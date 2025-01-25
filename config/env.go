@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/lpernett/godotenv"
 )
@@ -19,23 +20,13 @@ var Envs = initConfig()
 
 func initConfig() Config {
 	godotenv.Load()
-	// if dbNum, err := strconv.Atoi(getEnv("DB_NUMBER", "0")); err != nil {
 	return Config{
 		PublicHost: getEnv("PUBLIC_HOST", "http://localhost"),
 		Port:       getEnv("PORT", ":8080"),
 		DBPassword: getEnv("DB_PASSWORD", ""),
 		DBAddress:  fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "6379")),
-		DBNum:      0,
+		DBNum:      getEnvInt("DB_NUM", 0),
 	}
-	// } else {
-	// 	log.Fatal(err)
-	// 	return Config{
-	// 		PublicHost: getEnv("PUBLIC_HOST", "http://localhost"),
-	// 		Port:       getEnv("PORT", "8080"),
-	// 		DBPassword: getEnv("DB_PASSWORD", ""),
-	// 		DBAddress:  fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "6379")),
-	// 	}
-	// }
 }
 
 func getEnv(key, fallback string) string {
@@ -43,4 +34,16 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	intValue, err := strconv.Atoi(value)
+	if err != nil {
+		return fallback
+	}
+	return intValue
 }

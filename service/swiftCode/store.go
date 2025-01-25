@@ -3,7 +3,6 @@ package swiftCode
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/DroppedHard/SWIFT-service/types"
 	"github.com/redis/go-redis/v9"
@@ -58,8 +57,22 @@ func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode stri
 func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
 	rows, err := s.client.HGetAll(ctx, swiftCode).Result()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch data from Redis for key %s: %v", swiftCode, err)
 	}
-	log.Println("TODO", fmt.Sprint(rows))
-	return nil, nil
+	if len(rows) == 0 {
+		return nil, nil
+	}
+
+	bankDetails := &types.BankDataDetails{
+		BankDataCore: types.BankDataCore{
+			Address:       rows["address"],
+			BankName:      rows["bankName"],
+			CountryISO2:   rows["countryISO2"],
+			IsHeadquarter: rows["isHeadquarter"] == "true",
+			SwiftCode:     rows["swiftCode"],
+		},
+		CountryName: rows["countryName"],
+	}
+
+	return bankDetails, nil
 }

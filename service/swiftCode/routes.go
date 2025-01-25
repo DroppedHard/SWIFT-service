@@ -37,6 +37,11 @@ func (h *Handler) handleGetSwiftCodeData(w http.ResponseWriter, r *http.Request)
 	bank, err := h.store.GetBankDetailsBySwiftCode(ctx, swiftCode)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+	if bank == nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("the SWIFT code %s does not exist", swiftCode))
+		return
 	}
 
 	utils.WriteJSON(w, http.StatusOK, bank)

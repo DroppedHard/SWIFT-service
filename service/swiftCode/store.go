@@ -3,6 +3,8 @@ package swiftCode
 import (
 	"context"
 	"fmt"
+	"strings"
+	"sync"
 
 	"github.com/DroppedHard/SWIFT-service/types"
 	"github.com/redis/go-redis/v9"
@@ -49,9 +51,57 @@ func (s *Store) GetBanksDataByCountryCode(ctx context.Context, countryCode strin
 	panic("unimplemented")
 }
 
-// GetBranchesDataByHqSwiftCode implements types.BankDataStore.
 func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
-	panic("unimplemented")
+	branchPrefix := swiftCode[:8] + "???"
+	branchKeys, err := s.client.Keys(ctx, branchPrefix).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch branches for SWIFT code prefix %s: %w", branchPrefix, err)
+	}
+
+	var (
+		branches []types.BankDataCore
+		mu       sync.Mutex       // To safely append to branches slice
+		wg       sync.WaitGroup   // To wait for all goroutines to complete
+		errs     []string         // To collect errors from goroutines
+		errMu    sync.Mutex       // To safely append to the errs slice
+	)
+
+	for _, branchKey := range branchKeys {
+		if branchKey == swiftCode {
+			continue
+		}
+		wg.Add(1)
+		go func(branchKey string) {
+			defer wg.Done()
+			
+			branchFields, err := s.GetBankDetailsBySwiftCode(ctx, branchKey)
+			if err != nil {
+				errMu.Lock()
+				errs = append(errs, fmt.Sprintf("failed to fetch branch data for key %s: %v", branchKey, err))
+				errMu.Unlock()
+				return
+			}
+
+			mu.Lock()
+			branches = append(branches, types.BankDataCore{
+				Address:       branchFields.Address,
+				BankName:      branchFields.BankName,
+				CountryISO2:   branchFields.CountryISO2,
+				IsHeadquarter: branchFields.IsHeadquarter,
+				SwiftCode:     branchFields.SwiftCode,
+			})
+			mu.Unlock()
+		}(branchKey)
+
+	}
+
+	wg.Wait()
+
+	if len(errs) > 0 {
+		return branches, fmt.Errorf("encountered errors: %s", strings.Join(errs, "; "))
+	}
+	
+	return branches, nil
 }
 
 func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
@@ -68,7 +118,7 @@ func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string)
 			Address:       rows["address"],
 			BankName:      rows["bankName"],
 			CountryISO2:   rows["countryISO2"],
-			IsHeadquarter: rows["isHeadquarter"] == "true",
+			IsHeadquarter: rows["isHeadquarter"] == "1",
 			SwiftCode:     rows["swiftCode"],
 		},
 		CountryName: rows["countryName"],

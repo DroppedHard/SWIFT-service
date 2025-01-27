@@ -43,12 +43,27 @@ func (h *Handler) handleGetSwiftCodeData(w http.ResponseWriter, r *http.Request)
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("the SWIFT code %s does not exist", swiftCode))
 		return
 	}
-
+	if bank.IsHeadquarter {
+		branches, partialErr := h.store.GetBranchesDataByHqSwiftCode(ctx, swiftCode)
+		bankHq := types.BankHeadquatersResponse{
+			BankDataDetails: *bank,
+			Branches: branches,
+		}
+		if partialErr != nil {
+			utils.WriteJSON(w, http.StatusPartialContent, map[string]interface{}{
+				"data":    bankHq,
+				"message": fmt.Sprintf("failed to fetch branch info: %v", partialErr),
+			})
+			return
+		}
+		utils.WriteJSON(w, http.StatusOK, bankHq)
+		return
+	}
 	utils.WriteJSON(w, http.StatusOK, bank)
 }
 
 func (h *Handler) handleGetAllSwiftcodesForCountry(w http.ResponseWriter, r *http.Request) {
-
+	
 }
 
 func (h *Handler) handleAddSwiftCode(w http.ResponseWriter, r *http.Request) {

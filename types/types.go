@@ -15,6 +15,11 @@ type BankDataDetails struct {
 	CountryName string `json:"countryName" validate:"required"`
 }
 
+type BankHeadquatersResponse struct {
+	BankDataDetails
+	Branches []BankDataCore `json:"branches"`
+}
+
 type BankDataStore interface {
 	GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*BankDataDetails, error)
 	GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]BankDataCore, error)

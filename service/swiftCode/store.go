@@ -41,14 +41,23 @@ func (s *Store) AddBankData(ctx context.Context, data types.BankDataDetails) err
 	return nil
 }
 
-// DeleteBankData implements types.BankDataStore.
 func (s *Store) DeleteBankData(ctx context.Context, swiftCode string) error {
-	panic("unimplemented")
+	_, err := s.client.Del(ctx, swiftCode).Result()
+	if err != nil {
+		return fmt.Errorf("failed to delete data for SWIFT code %s: %w", swiftCode, err)
+	}
+
+	return nil
 }
 
-// GetBanksDataByCountryCode implements types.BankDataStore.
 func (s *Store) GetBanksDataByCountryCode(ctx context.Context, countryCode string) ([]types.BankDataCore, error) {
-	panic("unimplemented")
+	countryPrefix := "????" + countryCode + "?????"
+	keys, err := s.client.Keys(ctx, countryPrefix).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch keys for country code %s: %w", countryCode, err)
+	}
+
+	return s.getBankDetailsByCodesConcurrently(ctx, keys, "")
 }
 
 func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
@@ -58,50 +67,7 @@ func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode stri
 		return nil, fmt.Errorf("failed to fetch branches for SWIFT code prefix %s: %w", branchPrefix, err)
 	}
 
-	var (
-		branches []types.BankDataCore
-		mu       sync.Mutex       // To safely append to branches slice
-		wg       sync.WaitGroup   // To wait for all goroutines to complete
-		errs     []string         // To collect errors from goroutines
-		errMu    sync.Mutex       // To safely append to the errs slice
-	)
-
-	for _, branchKey := range branchKeys {
-		if branchKey == swiftCode {
-			continue
-		}
-		wg.Add(1)
-		go func(branchKey string) {
-			defer wg.Done()
-			
-			branchFields, err := s.GetBankDetailsBySwiftCode(ctx, branchKey)
-			if err != nil {
-				errMu.Lock()
-				errs = append(errs, fmt.Sprintf("failed to fetch branch data for key %s: %v", branchKey, err))
-				errMu.Unlock()
-				return
-			}
-
-			mu.Lock()
-			branches = append(branches, types.BankDataCore{
-				Address:       branchFields.Address,
-				BankName:      branchFields.BankName,
-				CountryISO2:   branchFields.CountryISO2,
-				IsHeadquarter: branchFields.IsHeadquarter,
-				SwiftCode:     branchFields.SwiftCode,
-			})
-			mu.Unlock()
-		}(branchKey)
-
-	}
-
-	wg.Wait()
-
-	if len(errs) > 0 {
-		return branches, fmt.Errorf("encountered errors: %s", strings.Join(errs, "; "))
-	}
-	
-	return branches, nil
+	return s.getBankDetailsByCodesConcurrently(ctx, branchKeys, swiftCode)
 }
 
 func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
@@ -125,4 +91,63 @@ func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string)
 	}
 
 	return bankDetails, nil
+}
+
+func (s *Store) getBankDetailsByCodesConcurrently(ctx context.Context, branchKeys []string, currentSwiftCode string) ([]types.BankDataCore, error) {
+	type result struct {
+		bankData types.BankDataCore
+		err      error
+	}
+	resultsChan := make(chan result, len(branchKeys))
+	var wg sync.WaitGroup
+
+	for _, branchKey := range branchKeys {
+		if branchKey == currentSwiftCode {
+			continue
+		}
+		wg.Add(1)
+		go func(branchKey string) {
+			defer wg.Done()
+
+			branchFields, err := s.GetBankDetailsBySwiftCode(ctx, branchKey)
+			if err != nil {
+				resultsChan <- result{err: fmt.Errorf("failed to fetch branch data for key %s: %w", branchKey, err)}
+				return
+			}
+
+			resultsChan <- result{bankData: types.BankDataCore{
+				Address:       branchFields.Address,
+				BankName:      branchFields.BankName,
+				CountryISO2:   branchFields.CountryISO2,
+				IsHeadquarter: branchFields.IsHeadquarter,
+				SwiftCode:     branchFields.SwiftCode,
+			}}
+		}(branchKey)
+
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
+	var (
+		branches []types.BankDataCore
+		errs     []string
+	)
+
+	for result := range resultsChan {
+		if result.err != nil {
+			errs = append(errs, result.err.Error())
+		} else {
+			branches = append(branches, result.bankData)
+		}
+	}
+
+	var aggregatedErr error
+	if len(errs) > 0 {
+		aggregatedErr = fmt.Errorf("encountered errors: %s", strings.Join(errs, "; "))
+	}
+
+	return branches, aggregatedErr
 }

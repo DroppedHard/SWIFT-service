@@ -20,18 +20,16 @@ func init() {
 
 func swiftCodeValidation(fl validator.FieldLevel) bool {
 	swiftCode := fl.Field().String()
-	swiftRegex := `^[A-Z0-9]{8}([A-Z0-9]{3})?$` // SWIFT code pattern.
+	swiftRegex := `^[A-Z0-9]{8}([A-Z0-9]{3})?$`
 
-	// Compile regex and validate.
 	re := regexp.MustCompile(swiftRegex)
 	return re.MatchString(swiftCode)
 }
 
 func countryIso2Validation(fl validator.FieldLevel) bool {
 	swiftCode := fl.Field().String()
-	swiftRegex := `^[A-Z0-9]{2}$` // SWIFT code pattern.
+	swiftRegex := `^[A-Z0-9]{2}$`
 
-	// Compile regex and validate.
 	re := regexp.MustCompile(swiftRegex)
 	return re.MatchString(swiftCode)
 }

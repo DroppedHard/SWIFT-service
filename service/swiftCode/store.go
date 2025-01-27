@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/DroppedHard/SWIFT-service/types"
+	"github.com/DroppedHard/SWIFT-service/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -51,8 +52,7 @@ func (s *Store) DeleteBankData(ctx context.Context, swiftCode string) error {
 }
 
 func (s *Store) GetBanksDataByCountryCode(ctx context.Context, countryCode string) ([]types.BankDataCore, error) {
-	countryPrefix := "????" + countryCode + "?????"
-	keys, err := s.client.Keys(ctx, countryPrefix).Result()
+	keys, err := s.client.Keys(ctx, utils.CountryCodeRegex(countryCode)).Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch keys for country code %s: %w", countryCode, err)
 	}
@@ -61,10 +61,9 @@ func (s *Store) GetBanksDataByCountryCode(ctx context.Context, countryCode strin
 }
 
 func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
-	branchPrefix := swiftCode[:8] + "???"
-	branchKeys, err := s.client.Keys(ctx, branchPrefix).Result()
+	branchKeys, err := s.client.Keys(ctx, utils.BranchRegex(swiftCode)).Result()
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch branches for SWIFT code prefix %s: %w", branchPrefix, err)
+		return nil, fmt.Errorf("failed to fetch branches for SWIFT code %s: %w", swiftCode, err)
 	}
 
 	return s.getBankDetailsByCodesConcurrently(ctx, branchKeys, swiftCode)
@@ -93,48 +92,30 @@ func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string)
 	return bankDetails, nil
 }
 
-func (s *Store) getBankDetailsByCodesConcurrently(ctx context.Context, branchKeys []string, currentSwiftCode string) ([]types.BankDataCore, error) {
-	type result struct {
-		bankData types.BankDataCore
-		err      error
-	}
-	resultsChan := make(chan result, len(branchKeys))
-	var wg sync.WaitGroup
+type bankDataChanResult struct {
+	bankData types.BankDataCore
+	err      error
+}
+
+func (s *Store) getBankDetailsByCodesConcurrently(ctx context.Context, branchKeys []string, currentSwiftCode string) (branches []types.BankDataCore, aggregatedErr error) {
+	resultsChan := make(chan bankDataChanResult, len(branchKeys))
+	var (
+		wg   sync.WaitGroup
+		errs []string
+	)
 
 	for _, branchKey := range branchKeys {
 		if branchKey == currentSwiftCode {
 			continue
 		}
 		wg.Add(1)
-		go func(branchKey string) {
-			defer wg.Done()
-
-			branchFields, err := s.GetBankDetailsBySwiftCode(ctx, branchKey)
-			if err != nil {
-				resultsChan <- result{err: fmt.Errorf("failed to fetch branch data for key %s: %w", branchKey, err)}
-				return
-			}
-
-			resultsChan <- result{bankData: types.BankDataCore{
-				Address:       branchFields.Address,
-				BankName:      branchFields.BankName,
-				CountryISO2:   branchFields.CountryISO2,
-				IsHeadquarter: branchFields.IsHeadquarter,
-				SwiftCode:     branchFields.SwiftCode,
-			}}
-		}(branchKey)
-
+		go s.fetchBankDetails(ctx, branchKey, resultsChan, &wg)
 	}
 
 	go func() {
 		wg.Wait()
 		close(resultsChan)
 	}()
-
-	var (
-		branches []types.BankDataCore
-		errs     []string
-	)
 
 	for result := range resultsChan {
 		if result.err != nil {
@@ -144,10 +125,27 @@ func (s *Store) getBankDetailsByCodesConcurrently(ctx context.Context, branchKey
 		}
 	}
 
-	var aggregatedErr error
 	if len(errs) > 0 {
 		aggregatedErr = fmt.Errorf("encountered errors: %s", strings.Join(errs, "; "))
 	}
+	return
+}
 
-	return branches, aggregatedErr
+func (s *Store) fetchBankDetails(ctx context.Context, branchKey string, resultsChan chan<- bankDataChanResult, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	branchFields, err := s.GetBankDetailsBySwiftCode(ctx, branchKey)
+	if err != nil {
+		resultsChan <- bankDataChanResult{err: fmt.Errorf("failed to fetch branch data for key %s: %w", branchKey, err)}
+	} else {
+		resultsChan <- bankDataChanResult{
+			bankData: types.BankDataCore{
+				Address:       branchFields.Address,
+				BankName:      branchFields.BankName,
+				CountryISO2:   branchFields.CountryISO2,
+				IsHeadquarter: branchFields.IsHeadquarter,
+				SwiftCode:     branchFields.SwiftCode,
+			},
+		}
+	}
 }

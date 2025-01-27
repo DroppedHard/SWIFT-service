@@ -1,6 +1,7 @@
 package swiftCode
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -17,9 +18,10 @@ type Handler struct {
 func NewHandler(store types.BankDataStore) *Handler {
 	return &Handler{store: store}
 }
+
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/swift-codes/{swift-code}", h.handleGetSwiftCodeData).Methods("GET")
-	router.HandleFunc("/swift-codes/country/{countryISO2}", h.handleGetAllSwiftcodesForCountry).Methods("GET")
+	router.HandleFunc("/swift-codes/country/{countryISO2}", h.handleGetAllSwiftCodesForCountry).Methods("GET")
 	router.HandleFunc("/swift-codes/", h.handleAddSwiftCode).Methods("POST")
 	router.HandleFunc("/swift-codes/{swift-code}", h.handleDeleteSwiftCode).Methods("DELETE")
 }
@@ -29,13 +31,13 @@ func (h *Handler) handleGetSwiftCodeData(w http.ResponseWriter, r *http.Request)
 	swiftCode := mux.Vars(r)["swift-code"]
 
 	if err := utils.Validate.Var(swiftCode, "required,swiftCode"); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("the given SWIFT code %s is not correct: %v", swiftCode, err))
 		return
 	}
 
 	bank, err := h.store.GetBankDetailsBySwiftCode(ctx, swiftCode)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("fetching bank details failed: %v", err))
 		return
 	}
 	if bank == nil {
@@ -43,54 +45,58 @@ func (h *Handler) handleGetSwiftCodeData(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if bank.IsHeadquarter {
-		branches, partialErr := h.store.GetBranchesDataByHqSwiftCode(ctx, swiftCode)
-		bankHq := types.BankHeadquatersResponse{
-			BankDataDetails: *bank,
-			Branches:        branches,
-		}
-		if partialErr != nil {
-			utils.WriteJSON(w, http.StatusPartialContent, map[string]interface{}{
-				"data":    bankHq,
-				"message": fmt.Sprintf("partial branch data fetched: %v", partialErr),
-			})
-			return
-		}
-		utils.WriteJSON(w, http.StatusOK, bankHq)
-		return
+		h.sendBankHqData(w, ctx, bank, swiftCode)
+	} else {
+		utils.WriteJson(w, http.StatusOK, bank)
 	}
-	utils.WriteJSON(w, http.StatusOK, bank)
 }
 
-func (h *Handler) handleGetAllSwiftcodesForCountry(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) sendBankHqData(w http.ResponseWriter, ctx context.Context, bank *types.BankDataDetails, swiftCode string) {
+	branches, partialErr := h.store.GetBranchesDataByHqSwiftCode(ctx, swiftCode)
+	bankHq := types.BankHeadquatersResponse{
+		BankDataDetails: *bank,
+		Branches:        branches,
+	}
+	if partialErr != nil {
+		utils.WriteJson(w, http.StatusPartialContent, map[string]interface{}{
+			"data":    bankHq,
+			"message": fmt.Sprintf("partial branch data fetched: %v", partialErr),
+		})
+		return
+	}
+	utils.WriteJson(w, http.StatusOK, bankHq)
+}
+
+func (h *Handler) handleGetAllSwiftCodesForCountry(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	countryCode := mux.Vars(r)["countryISO2"]
 
 	if err := utils.Validate.Var(countryCode, "required,countryISO2"); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("the given country ISO2 code %s is not correct: %v", countryCode, err))
 		return
 	}
 
 	banks, partialErr := h.store.GetBanksDataByCountryCode(ctx, countryCode)
 	response := types.CountrySwiftCodesResponse{
 		CountryIso2: countryCode,
-		CountryName: "TODO", // TODO
+		CountryName: utils.GetCountryNameFromCountryCode(countryCode),
 		SwiftCodes:  banks,
 	}
 	if partialErr != nil {
-		utils.WriteJSON(w, http.StatusPartialContent, map[string]interface{}{
+		utils.WriteJson(w, http.StatusPartialContent, map[string]interface{}{
 			"data":    response,
-			"message": fmt.Sprintf("partial branch data fetched: %v", partialErr),
+			"message": fmt.Sprintf("failure while fetching banks: %v", partialErr),
 		})
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, response)
+	utils.WriteJson(w, http.StatusOK, response)
 }
 
-func (h *Handler) handleAddSwiftCode(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleAddSwiftCode(w http.ResponseWriter, r *http.Request) { // TODO verify data correctiness
 	ctx := r.Context()
 	var payload types.BankDataDetails
 	if err := utils.ParseJSON(r, &payload); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err))
 		return
 	}
 
@@ -114,7 +120,7 @@ func (h *Handler) handleAddSwiftCode(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to add data: %w", err))
 		return
 	}
-	utils.WriteJSON(w, http.StatusCreated, map[string]string{"message": "bank data succesfully added"}) // TODO
+	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": "bank data succesfully added"}) // TODO
 }
 
 func (h *Handler) handleDeleteSwiftCode(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +128,7 @@ func (h *Handler) handleDeleteSwiftCode(w http.ResponseWriter, r *http.Request) 
 	swiftCode := mux.Vars(r)["swift-code"]
 
 	if err := utils.Validate.Var(swiftCode, "required,swiftCode"); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("the SWIFT code %s is incorrect: %v", swiftCode, err))
 		return
 	}
 
@@ -141,5 +147,5 @@ func (h *Handler) handleDeleteSwiftCode(w http.ResponseWriter, r *http.Request) 
 		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to delete data: %w", err))
 		return
 	}
-	utils.WriteJSON(w, http.StatusCreated, map[string]string{"message": "bank data succesfully deleted"}) // TODO
+	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": "bank data succesfully deleted"}) // TODO
 }

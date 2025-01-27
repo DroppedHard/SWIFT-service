@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/go-playground/validator/v10"
+	country "github.com/mikekonan/go-countries"
 )
 
 var Validate = validator.New()
@@ -27,9 +28,7 @@ func swiftCodeValidation(fl validator.FieldLevel) bool {
 }
 
 func countryIso2Validation(fl validator.FieldLevel) bool {
-	swiftCode := fl.Field().String()
-	swiftRegex := `^[A-Z0-9]{2}$`
-
-	re := regexp.MustCompile(swiftRegex)
-	return re.MatchString(swiftCode)
+	countryCode := fl.Field().String()
+	_, ok := country.ByAlpha2Code(country.Alpha2Code(countryCode))
+	return ok
 }

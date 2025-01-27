@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	country "github.com/mikekonan/go-countries"
 )
 
 func ParseJSON(r *http.Request, payload any) error {
@@ -14,7 +16,7 @@ func ParseJSON(r *http.Request, payload any) error {
 	return json.NewDecoder(r.Body).Decode(payload)
 }
 
-func WriteJSON(w http.ResponseWriter, status int, v any) error {
+func WriteJson(w http.ResponseWriter, status int, v any) error {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 
@@ -22,5 +24,21 @@ func WriteJSON(w http.ResponseWriter, status int, v any) error {
 }
 
 func WriteError(w http.ResponseWriter, status int, err error) {
-	WriteJSON(w, status, map[string]string{"message": err.Error()})
+	WriteJson(w, status, map[string]string{"message": err.Error()})
+}
+
+func BranchRegex(swiftCode string) string {
+	return swiftCode[:8] + "???"
+}
+
+func CountryCodeRegex(countryCode string) string {
+	return "????" + countryCode + "?????"
+}
+
+func GetCountryNameFromCountryCode(countryCode string) string {
+	result, ok := country.ByAlpha2Code(country.Alpha2Code(countryCode))
+	if ok {
+		return result.NameStr()
+	}
+	return ""
 }

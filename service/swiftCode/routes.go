@@ -108,7 +108,7 @@ func (h *Handler) handleAddSwiftCode(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJson(w, http.StatusCreated, map[string]string{"message": "bank data succesfully added"})
 }
 
-func (h *Handler) handleDeleteSwiftCode(w http.ResponseWriter, r *http.Request) { 
+func (h *Handler) handleDeleteSwiftCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	swiftCode := mux.Vars(r)["swift-code"]
 

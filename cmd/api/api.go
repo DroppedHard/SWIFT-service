@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -10,13 +11,15 @@ import (
 )
 
 type APIServer struct {
-	addr   string
+	host string
+	port   string
 	client *redis.Client
 }
 
-func NewAPIServer(addr string, client *redis.Client) *APIServer {
+func NewAPIServer(host string, port string, client *redis.Client) *APIServer {
 	return &APIServer{
-		addr:   addr,
+		host: host, 
+		port:   port,
 		client: client,
 	}
 }
@@ -29,7 +32,7 @@ func (s *APIServer) Run() error {
 	userHandler := swiftCode.NewHandler(bankDataStore)
 	userHandler.RegisterRoutes(subrouter)
 
-	log.Println("Listening on", s.addr)
+	log.Println("Listening on", fmt.Sprintf("%s:%s", s.host, s.port))
 
-	return http.ListenAndServe(s.addr, router)
+	return http.ListenAndServe(fmt.Sprintf(":%s", s.port), router)
 }

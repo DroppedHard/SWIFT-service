@@ -28,6 +28,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/go-playground/validator/v10 v10.24.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
+	github.com/jbub/banking v0.8.0
 	github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e
 	github.com/redis/go-redis/v9 v9.7.0
 )

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/DroppedHard/SWIFT-service/cmd/api"
@@ -11,16 +12,23 @@ import (
 )
 
 func main() {
-	db := db.NewRedisStorage(&redis.Options{
-		Addr:     config.Envs.DBAddress,
-		Password: config.Envs.DBPassword,
-		DB:       config.Envs.DBNum,
-		Protocol: 2,
+	rdb := db.NewRedisStorage(&redis.Options{
+		Addr:         config.Envs.DBAddress,
+		Password:     config.Envs.DBPassword,
+		DB:           config.Envs.DBNum,
+		PoolSize:     config.Envs.DBPoolSize,
+		MinIdleConns: config.Envs.DBMinIdleConns,
 	})
 
-	initStorage(db)
+	stats := rdb.PoolStats()
+	fmt.Printf("Total connections: %d\n", stats.TotalConns)
+	fmt.Printf("Idle connections: %d\n", stats.IdleConns)
+	fmt.Printf("Active connections: %d\n", stats.StaleConns)
+	fmt.Printf("Wait count: %d\n", stats.Timeouts)
 
-	server := api.NewAPIServer(config.Envs.Port, db)
+	initStorage(rdb)
+
+	server := api.NewAPIServer(config.Envs.Port, rdb)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}

@@ -9,3 +9,6 @@ run: build
 
 lint: 
 	@gofmt -s -w .
+
+migrate:
+	@go run cmd/migrate/main.go

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jbub/banking/swift"
 	country "github.com/mikekonan/go-countries"
 )
 
@@ -41,4 +42,16 @@ func GetCountryNameFromCountryCode(countryCode string) string {
 		return result.NameStr()
 	}
 	return ""
+}
+
+func GetCountryCodeFromSwiftCode(swiftCode string) (string, error) {
+	parsed, err := swift.Parse(swiftCode)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse SWIFT code: %v", err)
+	}
+	return parsed.CountryCode(), nil
+}
+
+func Xor(a bool, b bool) bool {
+	return (a || b) && !(a && b)
 }

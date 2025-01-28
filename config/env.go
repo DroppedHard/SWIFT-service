@@ -9,11 +9,13 @@ import (
 )
 
 type Config struct {
-	PublicHost string
-	Port       string
-	DBPassword string
-	DBAddress  string
-	DBNum      int
+	PublicHost     string
+	Port           string
+	DBPassword     string
+	DBAddress      string
+	DBNum          int
+	DBPoolSize     int
+	DBMinIdleConns int
 }
 
 var Envs = initConfig()
@@ -21,11 +23,13 @@ var Envs = initConfig()
 func initConfig() Config {
 	godotenv.Load()
 	return Config{
-		PublicHost: getEnv("PUBLIC_HOST", "http://localhost"),
-		Port:       getEnv("PORT", ":8080"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBAddress:  fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "6379")),
-		DBNum:      getEnvInt("DB_NUM", 0),
+		PublicHost:     getEnv("PUBLIC_HOST", "http://localhost"),
+		Port:           getEnv("PORT", ":8080"),
+		DBPassword:     getEnv("DB_PASSWORD", ""),
+		DBAddress:      fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "6379")),
+		DBNum:          getEnvInt("DB_NUM", 0),
+		DBPoolSize:     getEnvInt("DB_POOL_SIZE", 20),
+		DBMinIdleConns: getEnvInt("DB_MIN_IDLE_CONNS", 1),
 	}
 }
 

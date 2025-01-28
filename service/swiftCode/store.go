@@ -83,7 +83,7 @@ func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string)
 			Address:       rows["address"],
 			BankName:      rows["bankName"],
 			CountryISO2:   rows["countryISO2"],
-			IsHeadquarter: rows["isHeadquarter"] == "1",
+			IsHeadquarter: rows["isHeadquarter"] == "true",
 			SwiftCode:     rows["swiftCode"],
 		},
 		CountryName: rows["countryName"],

@@ -1,0 +1,145 @@
+[
+    {
+        "key": "AAISALTRXXX",
+        "fields": {
+            "swiftCode": "AAISALTRXXX",
+            "address": "HYRJA 3 RR. DRITAN HOXHA ND. 11 TIRANA, TIRANA, 1023",
+            "isHeadquarter": false,
+            "countryISO2": "AL.",
+            "bankName": "UNITED BANK OF ALBANIA SH.A",
+            "countryName": "ALBANIA"
+        }
+    },
+    {
+        "key": "ABIEBGS1XXX",
+        "fields": {
+            "swiftCode": "ABIEBGS1XXX",
+            "address": "TSAR ASEN 20  VARNA, VARNA, 9002",
+            "isHeadquarter": false,
+            "countryISO2": "BG",
+            "bankName": "ABV INVESTMENTS LTD",
+            "countryName": "BULGARIA"
+        }
+    },
+    {
+        "key": "ADCRBGS1XXX",
+        "fields": {
+            "swiftCode": "ADCRBGS1XXX",
+            "address": "JAMES BOURCHIER BLVD 76A HILL TOWER SOFIA, SOFIA, 1421",
+            "isHeadquarter": false,
+            "countryISO2": "BG",
+            "bankName": "ADAMANT CAPITAL PARTNERS AD",
+            "countryName": "BULGARIA"
+        }
+    },
+    {
+        "key": "AFAAUYM1XXX",
+        "fields": {
+            "swiftCode": "AFAAUYM1XXX",
+            "address": "PLAZA INDEPENDENCIA 743 MONTEVIDEO, MONTEVIDEO, 11000",
+            "isHeadquarter": false,
+            "countryISO2": "UY",
+            "bankName": "AFINIDAD A.F.A.P.S.A.",
+            "countryName": "URUGUAY"
+        }
+    },
+    {
+        "key": "AGRIMCM1XXX",
+        "fields": {
+            "swiftCode": "AGRIMCM1XXX",
+            "address": "23 BOULEVARD PRINCESSE CHARLOTTE MONACO, MONACO, 98000",
+            "isHeadquarter": false,
+            "countryISO2": "MC",
+            "bankName": "CREDIT AGRICOLE MONACO (CRCA PROVENCE COTE D'AZUR MONACO)",
+            "countryName": "MONACO"
+        }
+    },
+    {
+        "key": "AIPOPLP1XXX",
+        "fields": {
+            "swiftCode": "AIPOPLP1XXX",
+            "address": "STRZEGOMSKA 42C WROCLAW, DOLNOSLASKIE, 53-611",
+            "isHeadquarter": false,
+            "countryISO2": "PL",
+            "bankName": "SANTANDER CONSUMER BANK SPOLKA AKCYJNA",
+            "countryName": "POLAND"
+        }
+    },
+    {
+        "key": "AIZKLV22XXX",
+        "fields": {
+            "swiftCode": "AIZKLV22XXX",
+            "address": "MIHAILA TALA STREET 1 RIGA, RIGA, LV-1045",
+            "isHeadquarter": false,
+            "countryISO2": "LV",
+            "bankName": "ABLV BANK, AS IN LIQUIDATION",
+            "countryName": "LATVIA"
+        }
+    },
+    {
+        "key": "AKBKMTMTXXX",
+        "fields": {
+            "swiftCode": "AKBKMTMTXXX",
+            "address": "FLOOR 6, PORTOMASO BUSINESS TOWER 01 PORTOMASO PTM - ST. JULIAN'S ST. JULIAN'S, STJ 4011",
+            "isHeadquarter": false,
+            "countryISO2": "MT",
+            "bankName": "AKBANK T.A.S. (MALTA BRANCH)",
+            "countryName": "MALTA"
+        }
+    },
+    {
+        "key": "ALBPPLP1BMW",
+        "fields": {
+            "swiftCode": "ALBPPLP1BMW",
+            "address": "WARSZAWA, MAZOWIECKIE",
+            "isHeadquarter": false,
+            "countryISO2": "PL",
+            "bankName": "ALIOR BANK SPOLKA AKCYJNA",
+            "countryName": "POLAND"
+        }
+    },
+    {
+        "key": "ALBPPLPWXXX",
+        "fields": {
+            "swiftCode": "ALBPPLPWXXX",
+            "address": "LOPUSZANSKA BUSINESS PARK LOPUSZANSKA 38 D WARSZAWA, MAZOWIECKIE, 02-232",
+            "isHeadquarter": false,
+            "countryISO2": "PL",
+            "bankName": "ALIOR BANK SPOLKA AKCYJNA",
+            "countryName": "POLAND"
+        }
+    },
+    {
+        "key": "ANIBAWA1XXX",
+        "fields": {
+            "swiftCode": "ANIBAWA1XXX",
+            "address": "WILHELMINASTRAAT 36 - ORANJESTAD ORANJESTAD-WEST AND ORANJESTAD-EAST",
+            "isHeadquarter": false,
+            "countryISO2": "AW",
+            "bankName": "AIB BANK NV",
+            "countryName": "ARUBA"
+        }
+    },
+    {
+        "key": "ANTLUYM1XXX",
+        "fields": {
+            "swiftCode": "ANTLUYM1XXX",
+            "address": "GUATEMALA 1075 MONTEVIDEO, MONTEVIDEO, 11800",
+            "isHeadquarter": false,
+            "countryISO2": "UY",
+            "bankName": "ANTEL",
+            "countryName": "URUGUAY"
+        }
+    },
+    {
+        "key": "APSBMTMTXXX",
+        "fields": {
+            "swiftCode": "APSBMTMTXXX",
+            "address": "APS CENTRE TOWER STREET BIRKIRKARA, BIRKIRKARA, BKR 4012",
+            "isHeadquarter": false,
+            "countryISO2": "MT",
+            "bankName": "APS BANK PLC.",
+            "countryName": "MALTA"
+        }
+    }
+]

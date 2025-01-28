@@ -25,6 +25,8 @@ github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
+github.com/jbub/banking v0.8.0 h1:79kXJj1X2E9dWdWuFNkk2Pw7c6uYPFQS8ev0l+zMFxk=
+github.com/jbub/banking v0.8.0/go.mod h1:ctv/bD2EGRR5PobFrJSXZ/FZXCFtUbmVv6v2qf/b/88=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
 github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e h1:6b4YTtccT1y/3eSsDCVhB6boPPCh5bQwP1Pa863yH28=

@@ -27,10 +27,10 @@ type CountrySwiftCodesResponse struct {
 }
 
 type BankDataStore interface {
-	GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*BankDataDetails, error)
-	GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]BankDataCore, error)
-	GetBanksDataByCountryCode(ctx context.Context, countryCode string) ([]BankDataCore, error)
-	AddBankData(ctx context.Context, data BankDataDetails) error
-	DeleteBankData(ctx context.Context, swiftCode string) error
 	DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64, error)
+	SaveBankData(ctx context.Context, data BankDataDetails) error
+	DeleteBankData(ctx context.Context, swiftCode string) error
+	FindBanksDataByCountryCode(ctx context.Context, countryCode string) ([]BankDataCore, error)
+	FindBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]BankDataCore, error)
+	FindBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*BankDataDetails, error)
 }

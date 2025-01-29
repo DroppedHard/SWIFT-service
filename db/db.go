@@ -15,16 +15,18 @@ func NewRedisStorage(cfg *redis.Options) *redis.Client {
 
 func TestClientConection(client *redis.Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	key, val := "foo", "bar"
 	defer cancel()
-	err := client.Set(ctx, "foo", "bar", 0).Err()
+	
+	err := client.Set(ctx, key, val, 0).Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = client.Get(ctx, "foo").Err()
+	err = client.Get(ctx, key).Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = client.Del(ctx, "foo").Err()
+	err = client.Del(ctx, key).Err()
 	if err != nil {
 		log.Fatal(err)
 	}

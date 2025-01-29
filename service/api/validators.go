@@ -1,4 +1,4 @@
-package swiftCode
+package api
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func validateInput(input interface{}, tags string) error {
+func ValidateInput(input interface{}, tags string) error {
 	var err error
 
 	if tags == "" {
@@ -36,17 +36,17 @@ func validateInput(input interface{}, tags string) error {
 	return utils.ValidationError{Errors: errors}
 }
 
-func validateSwiftCode(r *http.Request) error {
+func ValidateSwiftCode(r *http.Request) error {
 	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]
-	return validateInput(swiftCode, "required,"+utils.ValidatorSwiftCode)
+	return ValidateInput(swiftCode, "required,"+utils.ValidatorSwiftCode)
 }
 
-func validateCountryCode(r *http.Request) error {
+func ValidateCountryCode(r *http.Request) error {
 	countryCode := mux.Vars(r)[utils.PathParamCountryIso2]
-	return validateInput(countryCode, "required,"+utils.ValidatorCountryIso2)
+	return ValidateInput(countryCode, "required,"+utils.ValidatorCountryIso2)
 }
 
-func validateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) error {
+func ValidateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) error {
 	if err := utils.Validate.Struct(payload); err != nil {
 		return fmt.Errorf("invalid payload structure: %w", err)
 	}

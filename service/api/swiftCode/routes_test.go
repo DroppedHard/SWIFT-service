@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DroppedHard/SWIFT-service/service/swiftCode"
+	"github.com/DroppedHard/SWIFT-service/service/api/swiftCode"
 	"github.com/DroppedHard/SWIFT-service/types"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/mock"
@@ -50,16 +50,16 @@ type mockSwiftCodeStore struct {
 	mock.Mock
 }
 
-func (m *mockSwiftCodeStore) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
+func (m *mockSwiftCodeStore) FindBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
 	return nil, nil
 }
-func (m *mockSwiftCodeStore) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
+func (m *mockSwiftCodeStore) FindBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
 	return nil, nil
 }
-func (m *mockSwiftCodeStore) GetBanksDataByCountryCode(ctx context.Context, countryCode string) ([]types.BankDataCore, error) {
+func (m *mockSwiftCodeStore) FindBanksDataByCountryCode(ctx context.Context, countryCode string) ([]types.BankDataCore, error) {
 	return nil, nil
 }
-func (m *mockSwiftCodeStore) AddBankData(ctx context.Context, data types.BankDataDetails) error {
+func (m *mockSwiftCodeStore) SaveBankData(ctx context.Context, data types.BankDataDetails) error {
 	return nil
 }
 func (m *mockSwiftCodeStore) DeleteBankData(ctx context.Context, swiftCode string) error {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/DroppedHard/SWIFT-service/cmd/api"
@@ -11,7 +12,7 @@ import (
 
 func main() {
 	rdb := db.NewRedisStorage(&redis.Options{
-		Addr:         config.Envs.DBAddress,
+		Addr:         fmt.Sprintf("%s:%s", config.Envs.DBHost, config.Envs.DBPort),
 		Password:     config.Envs.DBPassword,
 		DB:           config.Envs.DBNum,
 		PoolSize:     config.Envs.DBPoolSize,

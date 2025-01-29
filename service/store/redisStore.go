@@ -1,4 +1,4 @@
-package swiftCode
+package store
 
 import (
 	"context"
@@ -11,15 +11,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Store struct {
+type RedisStore struct {
 	client redis.Client
 }
 
-func NewStore(client *redis.Client) *Store {
-	return &Store{client: *client}
-}
-
-func (s *Store) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64, error) {
+func (s *RedisStore) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64, error) {
 	out, err := s.client.Exists(ctx, swiftCode).Result()
 	if err != nil {
 		return -1, err
@@ -27,7 +23,7 @@ func (s *Store) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64
 	return out, nil
 }
 
-func (s *Store) AddBankData(ctx context.Context, data types.BankDataDetails) error {
+func (s *RedisStore) SaveBankData(ctx context.Context, data types.BankDataDetails) error {
 	hashData := map[string]interface{}{ // TODO - maybe reduce this?
 		"address":       data.Address,
 		"bankName":      data.BankName,
@@ -42,7 +38,7 @@ func (s *Store) AddBankData(ctx context.Context, data types.BankDataDetails) err
 	return nil
 }
 
-func (s *Store) DeleteBankData(ctx context.Context, swiftCode string) error {
+func (s *RedisStore) DeleteBankData(ctx context.Context, swiftCode string) error {
 	_, err := s.client.Del(ctx, swiftCode).Result()
 	if err != nil {
 		return fmt.Errorf("failed to delete data for SWIFT code %s: %w", swiftCode, err)
@@ -51,7 +47,7 @@ func (s *Store) DeleteBankData(ctx context.Context, swiftCode string) error {
 	return nil
 }
 
-func (s *Store) GetBanksDataByCountryCode(ctx context.Context, countryCode string) ([]types.BankDataCore, error) {
+func (s *RedisStore) FindBanksDataByCountryCode(ctx context.Context, countryCode string) ([]types.BankDataCore, error) {
 	keys, err := s.client.Keys(ctx, utils.CountryCodeRegex(countryCode)).Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch keys for country code %s: %w", countryCode, err)
@@ -60,7 +56,7 @@ func (s *Store) GetBanksDataByCountryCode(ctx context.Context, countryCode strin
 	return s.getBankDetailsByCodesConcurrently(ctx, keys, "")
 }
 
-func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
+func (s *RedisStore) FindBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]types.BankDataCore, error) {
 	branchKeys, err := s.client.Keys(ctx, utils.BranchRegex(swiftCode)).Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch branches for SWIFT code %s: %w", swiftCode, err)
@@ -69,7 +65,7 @@ func (s *Store) GetBranchesDataByHqSwiftCode(ctx context.Context, swiftCode stri
 	return s.getBankDetailsByCodesConcurrently(ctx, branchKeys, swiftCode)
 }
 
-func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
+func (s *RedisStore) FindBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {
 	rows, err := s.client.HGetAll(ctx, swiftCode).Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data from Redis for key %s: %v", swiftCode, err)
@@ -83,7 +79,7 @@ func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string)
 			Address:       rows["address"],
 			BankName:      rows["bankName"],
 			CountryISO2:   rows["countryISO2"],
-			IsHeadquarter: rows["isHeadquarter"] == "true", // TODO - check if this is necessary -> boolean mapping string incident
+			IsHeadquarter: rows["isHeadquarter"] == "1",
 			SwiftCode:     rows["swiftCode"],
 		},
 		CountryName: rows["countryName"],
@@ -97,7 +93,7 @@ type bankDataChanResult struct {
 	err      error
 }
 
-func (s *Store) getBankDetailsByCodesConcurrently(ctx context.Context, branchKeys []string, currentSwiftCode string) (branches []types.BankDataCore, aggregatedErr error) {
+func (s *RedisStore) getBankDetailsByCodesConcurrently(ctx context.Context, branchKeys []string, currentSwiftCode string) (branches []types.BankDataCore, aggregatedErr error) {
 	resultsChan := make(chan bankDataChanResult, len(branchKeys))
 	var (
 		wg   sync.WaitGroup
@@ -131,10 +127,10 @@ func (s *Store) getBankDetailsByCodesConcurrently(ctx context.Context, branchKey
 	return
 }
 
-func (s *Store) fetchBankDetails(ctx context.Context, branchKey string, resultsChan chan<- bankDataChanResult, wg *sync.WaitGroup) {
+func (s *RedisStore) fetchBankDetails(ctx context.Context, branchKey string, resultsChan chan<- bankDataChanResult, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	branchFields, err := s.GetBankDetailsBySwiftCode(ctx, branchKey)
+	branchFields, err := s.FindBankDetailsBySwiftCode(ctx, branchKey)
 	if err != nil {
 		resultsChan <- bankDataChanResult{err: fmt.Errorf("failed to fetch branch data for key %s: %w", branchKey, err)}
 	} else {

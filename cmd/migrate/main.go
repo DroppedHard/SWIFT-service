@@ -12,12 +12,20 @@ import (
 	"time"
 
 	"github.com/DroppedHard/SWIFT-service/config"
+	"github.com/DroppedHard/SWIFT-service/utils"
 	"github.com/redis/go-redis/v9"
 )
 
 type RedisData struct {
 	Key    string            `json:"key"`
 	Fields map[string]string `json:"fields"`
+}
+
+func isHeadquarterParser(swiftCode string) string {
+	if strings.HasSuffix(swiftCode, utils.BranchSuffix) {
+		return "1"
+	}
+	return "0"
 }
 
 func parseCSV(file *os.File) ([]RedisData, error) {
@@ -36,7 +44,7 @@ func parseCSV(file *os.File) ([]RedisData, error) {
 		}
 		swiftCode := record[1]
 		address := record[3]
-		isHeadquarter := strings.HasSuffix(swiftCode, "XXX")
+		isHeadquarter := isHeadquarterParser(swiftCode)
 		countryISO2 := record[0]
 		bankName := record[2]
 		countryName := record[4]
@@ -46,7 +54,7 @@ func parseCSV(file *os.File) ([]RedisData, error) {
 			Fields: map[string]string{
 				"swiftCode":     swiftCode,
 				"address":       address,
-				"isHeadquarter": fmt.Sprintf("%t", isHeadquarter),
+				"isHeadquarter": isHeadquarter,
 				"countryISO2":   countryISO2,
 				"bankName":      bankName,
 				"countryName":   countryName,
@@ -74,7 +82,7 @@ func connectToRedis() *redis.Client {
 		fmt.Printf("Redis connection attempt %d...\n", i)
 
 		rdb = redis.NewClient(&redis.Options{
-			Addr:     config.Envs.DBAddress,
+			Addr:     fmt.Sprintf("%s:%s", config.Envs.DBHost, config.Envs.DBPort),
 			Password: config.Envs.DBPassword,
 			DB:       config.Envs.DBNum,
 		})

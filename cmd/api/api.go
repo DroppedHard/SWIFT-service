@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DroppedHard/SWIFT-service/service/swiftCode"
+	"github.com/DroppedHard/SWIFT-service/service/api/swiftCode"
+	"github.com/DroppedHard/SWIFT-service/service/store"
 	"github.com/DroppedHard/SWIFT-service/utils"
 	"github.com/gorilla/mux"
 	"github.com/redis/go-redis/v9"
@@ -29,7 +30,7 @@ func (s *APIServer) Run() error {
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix(utils.ApiPrefix).Subrouter()
 
-	bankDataStore := swiftCode.NewStore(s.client)
+	bankDataStore := store.NewStore(s.client)
 	userHandler := swiftCode.NewHandler(bankDataStore)
 	userHandler.RegisterRoutes(subrouter)
 

@@ -4,67 +4,74 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
+	"reflect"
 
 	"github.com/DroppedHard/SWIFT-service/types"
 	"github.com/DroppedHard/SWIFT-service/utils"
-	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/mux"
 )
 
-func validateInput(input interface{}, tags string) error {
-	var err error
-
-	if tags == "" {
-		err = utils.Validate.Struct(input)
-	} else {
-		err = utils.Validate.Var(input, tags)
-	}
-
-	if err == nil {
+func (h *Handler) fetchBankDataBySwiftCode(w http.ResponseWriter, ctx context.Context, swiftCode string) *types.BankDataDetails {
+	bank, err := h.store.GetBankDetailsBySwiftCode(ctx, swiftCode)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("fetching bank details failed: %v", err))
 		return nil
 	}
-
-	errors := make(map[string]string)
-	if validationErrs, ok := err.(validator.ValidationErrors); ok {
-		for _, fieldErr := range validationErrs {
-			errors[fieldErr.Field()] = fmt.Sprintf("validation failed on '%s' tag", fieldErr.Tag())
-		}
-	} else {
-		errors["error"] = err.Error()
+	if bank == nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("the SWIFT code %s was not found", swiftCode))
+		return nil
 	}
-	return utils.ValidationError{Errors: errors}
+	return bank
 }
 
-func validateSwiftCode(r *http.Request) error {
-	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]
-	return validateInput(swiftCode, "required," + utils.ValidatorSwiftCode)
-}
-
-func validateCountryCode(r *http.Request) error {
-	countryCode := mux.Vars(r)[utils.PathParamCountryIso2]
-	return validateInput(countryCode, "required," + utils.ValidatorCountryIso2)
-}
-
-func validateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) error {
-	if err := utils.Validate.Struct(payload); err != nil {
-		return fmt.Errorf("invalid payload structure: %w", err)
+func (h *Handler) writeBankHqData(w http.ResponseWriter, ctx context.Context, bank *types.BankDataDetails, swiftCode string) {
+	branches, partialErr := h.store.GetBranchesDataByHqSwiftCode(ctx, swiftCode)
+	bankHq := types.BankHeadquatersResponse{
+		BankDataDetails: *bank,
+		Branches:        branches,
 	}
+	if partialErr != nil {
+		utils.WriteJson(w, http.StatusPartialContent, bankHq)
+		return
+	}
+	utils.WriteJson(w, http.StatusOK, bankHq)
+}
 
-	expectedCountryCode, err := utils.GetCountryCodeFromSwiftCode(payload.SwiftCode)
+func (h *Handler) fetchBankDataByCountryCode(w http.ResponseWriter, ctx context.Context, countryCode string) *types.CountrySwiftCodesResponse {
+	banks, partialErr := h.store.GetBanksDataByCountryCode(ctx, countryCode)
+	response := types.CountrySwiftCodesResponse{
+		CountryIso2: countryCode,
+		CountryName: utils.GetCountryNameFromCountryCode(countryCode),
+		SwiftCodes:  banks,
+	}
+	if partialErr != nil {
+		utils.WriteJson(w, http.StatusPartialContent, response)
+		return nil
+	}
+	return &response
+}
+
+func (h *Handler) retrieveValidatedPayloadFromContext(w http.ResponseWriter, ctx context.Context) *types.BankDataDetails {
+	payload, ok := ctx.Value(reflect.TypeOf(types.BankDataDetails{})).(types.BankDataDetails)
+	if !ok {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to retrieve validated payload"))
+		return nil
+	}
+	return &payload
+}
+
+func (h *Handler) checkBankDataExistenceInStorage(w http.ResponseWriter, ctx context.Context, swiftCode string, shouldExist bool) bool {
+	exists, err := h.store.DoesSwiftCodeExist(ctx, swiftCode)
 	if err != nil {
-		return fmt.Errorf("invalid SWIFT code: %w", err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to check existence of key %s: %w", swiftCode, err))
+		return true
 	}
-	if payload.CountryISO2 != expectedCountryCode {
-		return fmt.Errorf("countryISO2 '%s' does not match the country derived from SWIFT code '%s'", payload.CountryISO2, expectedCountryCode)
+	if !shouldExist && exists > 0 {
+		utils.WriteError(w, http.StatusConflict, fmt.Errorf("the SWIFT code %s already exists", swiftCode))
+		return true
 	}
-	expectedCountryName := utils.GetCountryNameFromCountryCode(payload.CountryISO2)
-	if !strings.EqualFold(payload.CountryName, expectedCountryName) {
-		return fmt.Errorf("countryName '%s' does not match the country derived from countryISO2 '%s'", payload.CountryName, expectedCountryName)
+	if shouldExist && exists == 0 {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("the SWIFT code %s does not exist", swiftCode))
+		return true
 	}
-	if !utils.Xor(payload.IsHeadquarter, strings.HasSuffix(payload.SwiftCode, utils.BranchSuffix)) {
-		return fmt.Errorf("isHeadquarter value '%v' does not match the swiftCode value '%s'", payload.IsHeadquarter, payload.SwiftCode)
-	}
-
-	return nil
+	return false
 }

@@ -24,6 +24,10 @@ func WriteJson(w http.ResponseWriter, status int, v any) error {
 	return json.NewEncoder(w).Encode(v)
 }
 
+func WriteMessage(w http.ResponseWriter, status int, mess string) {
+	WriteJson(w, status, map[string]string{"message": mess})
+}
+
 func WriteError(w http.ResponseWriter, status int, err error) {
 	WriteJson(w, status, map[string]string{"message": err.Error()})
 }

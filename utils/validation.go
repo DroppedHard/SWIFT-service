@@ -47,6 +47,6 @@ func countryIso2Validation(fl validator.FieldLevel) bool {
 	return ok
 }
 
-func boolValidation(fl validator.FieldLevel) bool { // TODO - verify if this is necessary
-	return fl.Field().String() == "true" || fl.Field().String() == "false"
+func boolValidation(fl validator.FieldLevel) bool {
+	return fl.Field().Bool() || !fl.Field().Bool()
 }

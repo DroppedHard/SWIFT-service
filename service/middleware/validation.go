@@ -11,7 +11,7 @@ import (
 	"github.com/DroppedHard/SWIFT-service/utils"
 )
 
-func CustomValidationMiddleware(validateFn func(r *http.Request) error) func(http.HandlerFunc) http.HandlerFunc {
+func CustomPathParameterValidationMiddleware(validateFn func(r *http.Request) error) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if err := validateFn(r); err != nil {

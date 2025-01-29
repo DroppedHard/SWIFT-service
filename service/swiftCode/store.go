@@ -28,7 +28,7 @@ func (s *Store) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64
 }
 
 func (s *Store) AddBankData(ctx context.Context, data types.BankDataDetails) error {
-	hashData := map[string]interface{}{
+	hashData := map[string]interface{}{ // TODO - maybe reduce this?
 		"address":       data.Address,
 		"bankName":      data.BankName,
 		"countryISO2":   data.CountryISO2,
@@ -83,7 +83,7 @@ func (s *Store) GetBankDetailsBySwiftCode(ctx context.Context, swiftCode string)
 			Address:       rows["address"],
 			BankName:      rows["bankName"],
 			CountryISO2:   rows["countryISO2"],
-			IsHeadquarter: rows["isHeadquarter"] == "true",
+			IsHeadquarter: rows["isHeadquarter"] == "true", // TODO - check if this is necessary -> boolean mapping string incident
 			SwiftCode:     rows["swiftCode"],
 		},
 		CountryName: rows["countryName"],

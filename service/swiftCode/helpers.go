@@ -37,13 +37,13 @@ func validateInput(input interface{}, tags string) error {
 }
 
 func validateSwiftCode(r *http.Request) error {
-	swiftCode := mux.Vars(r)["swift-code"]
-	return validateInput(swiftCode, "required,swiftCode")
+	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]
+	return validateInput(swiftCode, "required," + utils.ValidatorSwiftCode)
 }
 
 func validateCountryCode(r *http.Request) error {
-	countryCode := mux.Vars(r)["countryISO2"]
-	return validateInput(countryCode, "required,countryISO2")
+	countryCode := mux.Vars(r)[utils.PathParamCountryIso2]
+	return validateInput(countryCode, "required," + utils.ValidatorCountryIso2)
 }
 
 func validateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) error {
@@ -62,7 +62,7 @@ func validateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) e
 	if !strings.EqualFold(payload.CountryName, expectedCountryName) {
 		return fmt.Errorf("countryName '%s' does not match the country derived from countryISO2 '%s'", payload.CountryName, expectedCountryName)
 	}
-	if !utils.Xor(payload.IsHeadquarter, strings.HasSuffix(payload.SwiftCode, "XXX")) {
+	if !utils.Xor(payload.IsHeadquarter, strings.HasSuffix(payload.SwiftCode, utils.BranchSuffix)) {
 		return fmt.Errorf("isHeadquarter value '%v' does not match the swiftCode value '%s'", payload.IsHeadquarter, payload.SwiftCode)
 	}
 

@@ -19,8 +19,8 @@ func TestSwiftCodeServiceHandlers(t *testing.T) {
 	handler := swiftCode.NewHandler(store)
 	router := mux.NewRouter()
 	handler.RegisterRoutes(router)
-	t.Run("should fail if the given payload is invalid", func (t *testing.T) {
-		
+	t.Run("should fail if the given payload is invalid", func(t *testing.T) {
+
 		payload := types.BankDataDetails{
 			BankDataCore: types.BankDataCore{
 				Address:       "",
@@ -29,7 +29,7 @@ func TestSwiftCodeServiceHandlers(t *testing.T) {
 				IsHeadquarter: false,
 				SwiftCode:     "",
 			},
-			CountryName:  "",
+			CountryName: "",
 		}
 		marshalled, _ := json.Marshal(payload)
 		req, err := http.NewRequest(http.MethodPost, "/swift-codes/", bytes.NewBuffer(marshalled))
@@ -41,12 +41,12 @@ func TestSwiftCodeServiceHandlers(t *testing.T) {
 		router.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusBadRequest {
-			t.Errorf("expoected %d, got %d", http.StatusBadRequest, rr.Code)
+			t.Errorf("expected %d, got %d", http.StatusBadRequest, rr.Code)
 		}
 	})
 }
 
-type mockSwiftCodeStore struct{
+type mockSwiftCodeStore struct {
 	mock.Mock
 }
 
@@ -62,8 +62,8 @@ func (m *mockSwiftCodeStore) GetBanksDataByCountryCode(ctx context.Context, coun
 func (m *mockSwiftCodeStore) AddBankData(ctx context.Context, data types.BankDataDetails) error {
 	return nil
 }
-func (m *mockSwiftCodeStore) DeleteBankData(ctx context.Context, swiftCode string) error { 
-	return nil 
+func (m *mockSwiftCodeStore) DeleteBankData(ctx context.Context, swiftCode string) error {
+	return nil
 }
 func (m *mockSwiftCodeStore) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64, error) {
 	return 0, nil

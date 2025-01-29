@@ -9,13 +9,13 @@ import (
 )
 
 type Config struct {
-	PublicHost     string
-	Port           string
-	DBPassword     string
-	DBAddress      string
-	DBNum          int
-	DBPoolSize     int
-	DBMinIdleConns int
+	PublicHost        string
+	Port              string
+	DBPassword        string
+	DBAddress         string
+	DBNum             int
+	DBPoolSize        int
+	DBMinIdleConns    int
 	MigrationFilePath string
 }
 
@@ -24,13 +24,13 @@ var Envs = initConfig()
 func initConfig() Config {
 	godotenv.Load()
 	return Config{
-		PublicHost:     getEnv("PUBLIC_HOST", "localhost"),
-		Port:           getEnv("PORT", ":8080"),
-		DBPassword:     getEnv("DB_PASSWORD", ""),
-		DBAddress:      fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "6379")),
-		DBNum:          getEnvInt("DB_NUM", 0),
-		DBPoolSize:     getEnvInt("DB_POOL_SIZE", 20),
-		DBMinIdleConns: getEnvInt("DB_MIN_IDLE_CONNS", 1),
+		PublicHost:        getEnv("PUBLIC_HOST", "localhost"),
+		Port:              getEnv("PORT", ":8080"),
+		DBPassword:        getEnv("DB_PASSWORD", ""),
+		DBAddress:         fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "6379")),
+		DBNum:             getEnvInt("DB_NUM", 0),
+		DBPoolSize:        getEnvInt("DB_POOL_SIZE", 20),
+		DBMinIdleConns:    getEnvInt("DB_MIN_IDLE_CONNS", 1),
 		MigrationFilePath: getEnv("MIGRATION_FILE", "./cmd/migrate/migrations/initial_data.csv"),
 	}
 }

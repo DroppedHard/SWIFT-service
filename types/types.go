@@ -5,7 +5,7 @@ import "context"
 type BankDataCore struct {
 	Address       string `json:"address" validate:"required"`
 	BankName      string `json:"bankName" validate:"required"`
-	CountryISO2   string `json:"countryISO2" validate:"required,countryISO2"` // potentially add a custom validator that verifies if it is a country code.
+	CountryISO2   string `json:"countryISO2" validate:"required,countryISO2"`
 	IsHeadquarter bool   `json:"isHeadquarter" validate:"boolRequired"`
 	SwiftCode     string `json:"swiftCode" validate:"required,len=11,swiftCode"`
 }

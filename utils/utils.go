@@ -9,7 +9,7 @@ import (
 	country "github.com/mikekonan/go-countries"
 )
 
-func ParseJSON(r *http.Request, payload any) error {
+func ParseJson(r *http.Request, payload any) error {
 	if r.Body == nil {
 		return fmt.Errorf("missing request body")
 	}

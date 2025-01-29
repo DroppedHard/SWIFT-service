@@ -87,7 +87,7 @@ func connectToRedis() *redis.Client {
 			fmt.Println("Connected to Redis!")
 			return rdb
 		}
-		
+
 		fmt.Printf("Redis connection failed: %v. Retrying in %v...\n", err, delay)
 		time.Sleep(delay)
 	}
@@ -96,8 +96,6 @@ func connectToRedis() *redis.Client {
 	os.Exit(1)
 	return nil
 }
-
-
 
 func startMigration(data []RedisData, rdb *redis.Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

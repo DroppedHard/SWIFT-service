@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 
 	"github.com/DroppedHard/SWIFT-service/cmd/api"
@@ -19,27 +18,10 @@ func main() {
 		MinIdleConns: config.Envs.DBMinIdleConns,
 	})
 
-	initStorage(rdb)
+	db.TestClientConection(rdb)
 
 	server := api.NewAPIServer(config.Envs.PublicHost, config.Envs.Port, rdb)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func initStorage(client *redis.Client) {
-	ctx := context.Background()
-	err := client.Set(ctx, "foo", "bar", 0).Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = client.Get(ctx, "foo").Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = client.Del(ctx, "foo").Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("DB: Succesfully connected!")
 }

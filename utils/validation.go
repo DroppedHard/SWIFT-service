@@ -19,12 +19,14 @@ func (v ValidationError) Error() string {
 }
 
 func init() {
-	errSwift := Validate.RegisterValidation("swiftCode", swiftCodeValidation)
-	errIso2 := Validate.RegisterValidation("countryISO2", countryIso2Validation)
+	errSwift := Validate.RegisterValidation(ValidatorSwiftCode, swiftCodeValidation)
+	errIso2 := Validate.RegisterValidation(ValidatorCountryIso2, countryIso2Validation)
 	errBool := Validate.RegisterValidation("boolRequired", boolValidation)
-	if errSwift != nil || errIso2 != nil {
-		fmt.Println("failed to register validation - swiftCode: ", errSwift, " countryISO2: ", errIso2)
-		return
+	if errSwift != nil {
+		fmt.Println("failed to register swiftCode validation: ", errSwift)
+	}
+	if errIso2 != nil {
+		fmt.Println("failed to register countryISO2 validation:", errIso2)
 	}
 	if errBool != nil {
 		fmt.Println("failed to register bool validation:", errBool)
@@ -45,6 +47,6 @@ func countryIso2Validation(fl validator.FieldLevel) bool {
 	return ok
 }
 
-func boolValidation(fl validator.FieldLevel) bool {
+func boolValidation(fl validator.FieldLevel) bool { // TODO - verify if this is necessary
 	return fl.Field().String() == "true" || fl.Field().String() == "false"
 }

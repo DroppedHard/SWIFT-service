@@ -16,6 +16,7 @@ type Config struct {
 	DBNum          int
 	DBPoolSize     int
 	DBMinIdleConns int
+	MigrationFilePath string
 }
 
 var Envs = initConfig()
@@ -30,6 +31,7 @@ func initConfig() Config {
 		DBNum:          getEnvInt("DB_NUM", 0),
 		DBPoolSize:     getEnvInt("DB_POOL_SIZE", 20),
 		DBMinIdleConns: getEnvInt("DB_MIN_IDLE_CONNS", 1),
+		MigrationFilePath: getEnv("MIGRATION_FILE", "./cmd/migrate/migrations/initial_data.csv"),
 	}
 }
 

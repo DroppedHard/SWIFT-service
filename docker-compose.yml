@@ -17,17 +17,21 @@ services:
 
   api:
     build:
-      context: /
+      context: .
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - app-network
     ports:
       - "8080:8080"
+    volumes:
+    - ./cmd/migrate/migrations:/data 
     environment:
       PORT: 8080
       DB_HOST: redis
       DB_PORT: 6379
+      MIGRATION_FILE: /data/initial_data.csv
     
 
 volumes:

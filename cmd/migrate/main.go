@@ -65,11 +65,67 @@ func parseJSON(file *os.File) ([]RedisData, error) {
 	return data, nil
 }
 
-func main() {
+func connectToRedis() *redis.Client {
+	var rdb *redis.Client
+	retryCount := 10
+	delay := 2 * time.Second
 
+	for i := 0; i < retryCount; i++ {
+		fmt.Printf("Redis connection attempt %d...\n", i)
+
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     config.Envs.DBAddress,
+			Password: config.Envs.DBPassword,
+			DB:       config.Envs.DBNum,
+		})
+
+		ctx, cancel := context.WithTimeout(context.Background(), delay)
+		defer cancel()
+
+		_, err := rdb.Ping(ctx).Result()
+		if err == nil {
+			fmt.Println("Connected to Redis!")
+			return rdb
+		}
+		
+		fmt.Printf("Redis connection failed: %v. Retrying in %v...\n", err, delay)
+		time.Sleep(delay)
+	}
+
+	fmt.Println("Failed to connect to Redis after multiple attempts. Exiting.")
+	os.Exit(1)
+	return nil
+}
+
+
+
+func startMigration(data []RedisData, rdb *redis.Client) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var wg sync.WaitGroup
+	for _, entry := range data {
+		wg.Add(1)
+		go func(entry RedisData) {
+			defer wg.Done()
+
+			if _, err := rdb.HSet(ctx, entry.Key, entry.Fields).Result(); err != nil {
+				fmt.Printf("Failed to populate key %s: %v\n", entry.Key, err)
+				return
+			}
+			fmt.Printf("Successfully populated key: %s\n", entry.Key)
+		}(entry)
+	}
+	wg.Wait()
+	fmt.Println("Migration completed successfully.")
+}
+
+func main() {
 	var filePath string
-	flag.StringVar(&filePath, "source", "./cmd/migrate/migrations/initial_data.csv", "Path to the JSON file containing migration data")
+	flag.StringVar(&filePath, "source", config.Envs.MigrationFilePath, "Path to the JSON file containing migration data")
 	flag.Parse()
+
+	rdb := connectToRedis()
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -94,31 +150,5 @@ func main() {
 		return
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     config.Envs.DBAddress,
-		Password: config.Envs.DBPassword,
-		DB:       config.Envs.DBNum,
-	})
-
 	startMigration(data, rdb)
-}
-
-func startMigration(data []RedisData, rdb *redis.Client) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	var wg sync.WaitGroup
-	for _, entry := range data {
-		wg.Add(1)
-		go func(entry RedisData) {
-			defer wg.Done()
-
-			if _, err := rdb.HSet(ctx, entry.Key, entry.Fields).Result(); err != nil {
-				fmt.Printf("Failed to populate key %s: %v\n", entry.Key, err)
-				return
-			}
-			fmt.Printf("Successfully populated key: %s\n", entry.Key)
-		}(entry)
-	}
-	wg.Wait()
-	fmt.Println("Migration completed successfully.")
 }

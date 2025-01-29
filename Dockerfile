@@ -3,11 +3,12 @@ WORKDIR /app
 COPY . .
 RUN go mod download
 RUN make build
-RUN make migrate
-RUN ls -l /app/bin
+RUN make build-migrate
 
 FROM golang:1.23
 WORKDIR /app
 COPY --from=builder /app/bin/swift-service.exe .
+COPY --from=builder /app/bin/swift-migrate.exe .
+
 EXPOSE 8080
-CMD ["./swift-service.exe"]
+CMD ["/bin/sh", "-c", "./swift-migrate.exe && ./swift-service.exe"]

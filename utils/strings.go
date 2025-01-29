@@ -7,4 +7,6 @@ const (
 	ValidatorCountryIso2 = "countryISO2"
 	BranchSuffix         = "XXX"
 	ApiPrefix            = "/api/v1"
+	RedisStoreTrue       = "1"
+	RedisStoreFalse      = "0"
 )

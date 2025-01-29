@@ -79,7 +79,7 @@ func (s *RedisStore) FindBankDetailsBySwiftCode(ctx context.Context, swiftCode s
 			Address:       rows["address"],
 			BankName:      rows["bankName"],
 			CountryISO2:   rows["countryISO2"],
-			IsHeadquarter: rows["isHeadquarter"] == "1",
+			IsHeadquarter: rows["isHeadquarter"] == utils.RedisStoreTrue,
 			SwiftCode:     rows["swiftCode"],
 		},
 		CountryName: rows["countryName"],

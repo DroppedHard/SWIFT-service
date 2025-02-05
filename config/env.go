@@ -14,6 +14,7 @@ type Config struct {
 	DBHost            string
 	DBPort            string
 	DBNum             int
+	DBTestNum         int
 	DBPoolSize        int
 	DBMinIdleConns    int
 	MigrationFilePath string
@@ -26,6 +27,7 @@ var defaultConfig = Config{
 	DBHost:            "localhost",
 	DBPort:            "6379",
 	DBNum:             0,
+	DBTestNum:         1,
 	DBPoolSize:        20,
 	DBMinIdleConns:    1,
 	MigrationFilePath: "./cmd/migrate/migrations/initial_data.csv",
@@ -42,6 +44,7 @@ func initConfig() Config {
 		DBHost:            getEnv("DB_HOST", defaultConfig.DBHost),
 		DBPort:            getEnv("DB_PORT", defaultConfig.DBPort),
 		DBNum:             getEnvInt("DB_NUM", defaultConfig.DBNum),
+		DBTestNum:         getEnvInt("DB_TEST_NUM", defaultConfig.DBTestNum),
 		DBPoolSize:        getEnvInt("DB_POOL_SIZE", defaultConfig.DBPoolSize),
 		DBMinIdleConns:    getEnvInt("DB_MIN_IDLE_CONNS", defaultConfig.DBMinIdleConns),
 		MigrationFilePath: getEnv("MIGRATION_FILE", defaultConfig.MigrationFilePath),

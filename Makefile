@@ -1,8 +1,8 @@
 build: 
-	@go build -o bin/swift-service.exe cmd/main.go
+	@go build -o bin/swift-service.exe ./cmd/main.go
 
 build-migrate: 
-	@go build -o bin/swift-migrate.exe cmd/migrate/main.go
+	@go build -o bin/swift-migrate.exe ./cmd/migrate
 
 test:
 	@go test -v ./...

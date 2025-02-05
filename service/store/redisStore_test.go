@@ -52,7 +52,6 @@ func (suite *RedisStoreTestSuite) countBranches(swiftCode string) int {
 			counter++
 		}
 	}
-	fmt.Println(counter)
 	return counter
 }
 

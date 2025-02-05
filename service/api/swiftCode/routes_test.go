@@ -175,8 +175,16 @@ func (suite *RoutesTestSuite) TestPostBankData() {
 	suite.Run("Positive Cases", func() {
 		for _, testCase := range PostBankDataPositiveTestCases {
 			suite.Run(testCase.Description, func() {
-				suite.store.On(utils.GetFunctionName(types.BankDataStore.DoesSwiftCodeExist), mock.Anything, testCase.BankData.SwiftCode).Return(int64(0), nil)
-				suite.store.On(utils.GetFunctionName(types.BankDataStore.SaveBankData), mock.Anything, testCase.BankData).Return(nil)
+				suite.store.On(
+					utils.GetFunctionName(types.BankDataStore.DoesSwiftCodeExist),
+					mock.Anything,
+					testCase.BankData.SwiftCode,
+				).Return(int64(0), nil)
+				suite.store.On(
+					utils.GetFunctionName(types.BankDataStore.SaveBankData),
+					mock.Anything,
+					testCase.BankData,
+				).Return(nil)
 				defer suite.resetMocks()
 
 				rr := suite.makePostRequest("/swift-codes/", testCase.BankData)
@@ -191,8 +199,16 @@ func (suite *RoutesTestSuite) TestPostBankData() {
 	suite.Run("Negative Cases", func() {
 		for _, testCase := range PostBankDataNegativeTestCases {
 			suite.Run(testCase.Description, func() {
-				suite.store.On(utils.GetFunctionName(types.BankDataStore.DoesSwiftCodeExist), mock.Anything, testCase.BankData.SwiftCode).Return(testCase.NegativeExistValue, testCase.NegativeExistError).Maybe()
-				suite.store.On(utils.GetFunctionName(types.BankDataStore.SaveBankData), mock.Anything, testCase.BankData).Return(testCase.NegativeSaveError).Maybe()
+				suite.store.On(
+					utils.GetFunctionName(types.BankDataStore.DoesSwiftCodeExist),
+					mock.Anything,
+					testCase.BankData.SwiftCode,
+				).Return(testCase.NegativeExistValue, testCase.NegativeExistError).Maybe()
+				suite.store.On(
+					utils.GetFunctionName(types.BankDataStore.SaveBankData),
+					mock.Anything,
+					testCase.BankData,
+				).Return(testCase.NegativeSaveError).Maybe()
 				defer suite.resetMocks()
 
 				rr := suite.makePostRequest("/swift-codes/", testCase.BankData)
@@ -227,8 +243,16 @@ func (suite *RoutesTestSuite) TestDeleteBankData() {
 	suite.Run("Negative Cases", func() {
 		for _, testCase := range DeleteBankDataNegativeTestCases {
 			suite.Run(testCase.Description, func() {
-				suite.store.On(utils.GetFunctionName(types.BankDataStore.DoesSwiftCodeExist), mock.Anything, testCase.SwiftCode).Return(testCase.NegativeExistValue, testCase.NegativeExistError).Maybe()
-				suite.store.On(utils.GetFunctionName(types.BankDataStore.DeleteBankData), mock.Anything, testCase.SwiftCode).Return(testCase.NegativeDeleteError).Maybe()
+				suite.store.On(
+					utils.GetFunctionName(types.BankDataStore.DoesSwiftCodeExist),
+					mock.Anything,
+					testCase.SwiftCode,
+				).Return(testCase.NegativeExistValue, testCase.NegativeExistError).Maybe()
+				suite.store.On(
+					utils.GetFunctionName(types.BankDataStore.DeleteBankData),
+					mock.Anything,
+					testCase.SwiftCode,
+				).Return(testCase.NegativeDeleteError).Maybe()
 				defer suite.resetMocks()
 
 				rr := suite.makeRequest("DELETE", "/swift-codes/"+testCase.SwiftCode)

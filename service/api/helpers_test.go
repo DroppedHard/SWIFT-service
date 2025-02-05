@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type UtilsTestCase struct {
+type HelpersTestCase struct {
 	Description  string
 	RequestBody  string
 	ExpectedErr  error
@@ -23,7 +23,7 @@ type UtilsTestCase struct {
 }
 
 func TestParseJson(t *testing.T) {
-	tests := []UtilsTestCase{
+	tests := []HelpersTestCase{
 		{
 			Description: "Valid JSON",
 			RequestBody: `{"field":"value"}`,
@@ -57,7 +57,7 @@ func TestParseJson(t *testing.T) {
 }
 
 func TestWriteJson(t *testing.T) {
-	tests := []UtilsTestCase{
+	tests := []HelpersTestCase{
 		{
 			Description:  "Write valid JSON response",
 			StatusCode:   http.StatusOK,
@@ -87,7 +87,7 @@ func TestWriteJson(t *testing.T) {
 }
 
 func TestWriteMessage(t *testing.T) {
-	tests := []UtilsTestCase{
+	tests := []HelpersTestCase{
 		{
 			Description:  "Write message with OK status",
 			StatusCode:   http.StatusOK,
@@ -118,7 +118,7 @@ func TestWriteMessage(t *testing.T) {
 }
 
 func TestWriteError(t *testing.T) {
-	tests := []UtilsTestCase{
+	tests := []HelpersTestCase{
 		{
 			Description:  "Write error with OK status",
 			StatusCode:   http.StatusBadRequest,

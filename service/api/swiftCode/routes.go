@@ -22,7 +22,7 @@ func NewHandler(store types.BankDataStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/swift-codes/{"+utils.PathParamSwiftCode+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateSwiftCode)(h.getBankDataBySwiftCode)).Methods("GET")
 	router.HandleFunc("/swift-codes/country/{"+utils.PathParamCountryIso2+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateCountryCode)(h.getBankDataByCountryCode)).Methods("GET")
-	router.HandleFunc("/swift-codes/", middleware.BodyValidationMiddleware(api.ValidateAddSwiftCode)(h.postBankData)).Methods("POST")
+	router.HandleFunc("/swift-codes/", middleware.BodyValidationMiddleware(api.ValidatePostSwiftCodePayload)(h.postBankData)).Methods("POST")
 	router.HandleFunc("/swift-codes/{"+utils.PathParamSwiftCode+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateSwiftCode)(h.deleteBankData)).Methods("DELETE")
 }
 

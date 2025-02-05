@@ -46,7 +46,7 @@ func ValidateCountryCode(r *http.Request) error {
 	return ValidateInput(countryCode, "required,"+utils.ValidatorCountryIso2)
 }
 
-func ValidateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) error {
+func ValidatePostSwiftCodePayload(ctx context.Context, payload *types.BankDataDetails) error {
 	if err := utils.Validate.Struct(payload); err != nil {
 		return fmt.Errorf("invalid payload structure: %w", err)
 	}

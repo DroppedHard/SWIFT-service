@@ -21,7 +21,7 @@ func (v ValidationError) Error() string {
 func init() {
 	errSwift := Validate.RegisterValidation(ValidatorSwiftCode, swiftCodeValidation)
 	errIso2 := Validate.RegisterValidation(ValidatorCountryIso2, countryIso2Validation)
-	errBool := Validate.RegisterValidation("boolRequired", boolValidation)
+	errBool := Validate.RegisterValidation(ValidatorBoolRequired, boolValidation)
 	if errSwift != nil {
 		fmt.Println("failed to register swiftCode validation: ", errSwift)
 	}

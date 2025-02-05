@@ -8,7 +8,7 @@ import (
 )
 
 func BranchRegex(swiftCode string) string {
-	return swiftCode[:8] + "???"
+	return swiftCode[:SwiftCodeLength] + "???"
 }
 
 func CountryCodeRegex(countryCode string) string {

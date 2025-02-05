@@ -55,10 +55,10 @@ func ValidateAddSwiftCode(ctx context.Context, payload *types.BankDataDetails) e
 	if err != nil {
 		return fmt.Errorf("invalid SWIFT code: %w", err)
 	}
-	if payload.CountryISO2 != expectedCountryCode {
-		return fmt.Errorf("countryISO2 '%s' does not match the country derived from SWIFT code '%s'", payload.CountryISO2, expectedCountryCode)
+	if payload.CountryIso2 != expectedCountryCode {
+		return fmt.Errorf("countryISO2 '%s' does not match the country derived from SWIFT code '%s'", payload.CountryIso2, expectedCountryCode)
 	}
-	expectedCountryName := utils.GetCountryNameFromCountryCode(payload.CountryISO2)
+	expectedCountryName := utils.GetCountryNameFromCountryCode(payload.CountryIso2)
 	if !strings.EqualFold(payload.CountryName, expectedCountryName) {
 		return fmt.Errorf("countryName '%s' does not match the country derived from countryISO2 '%s'", payload.CountryName, expectedCountryName)
 	}

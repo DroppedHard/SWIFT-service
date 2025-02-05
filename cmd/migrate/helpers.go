@@ -15,6 +15,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type RedisData struct {
+	Key    string            `json:"key"`
+	Fields map[string]string `json:"fields"`
+}
+
 func parseCSV(file *os.File) ([]RedisData, error) {
 	var data []RedisData
 	reader := csv.NewReader(file)
@@ -32,19 +37,19 @@ func parseCSV(file *os.File) ([]RedisData, error) {
 		swiftCode := record[1]
 		address := record[3]
 		isHeadquarter := isHeadquarterParser(swiftCode)
-		countryISO2 := record[0]
+		countryIso2 := record[0]
 		bankName := record[2]
 		countryName := record[4]
 
 		redisEntry := RedisData{
 			Key: swiftCode,
 			Fields: map[string]string{
-				"swiftCode":     swiftCode,
-				"address":       address,
-				"isHeadquarter": isHeadquarter,
-				"countryISO2":   countryISO2,
-				"bankName":      bankName,
-				"countryName":   countryName,
+				utils.RedisHashSwiftCode:     swiftCode,
+				utils.RedisHashAddress:       address,
+				utils.RedisHashIsHeadquarter: isHeadquarter,
+				utils.RedisHashCountryISO2:   countryIso2,
+				utils.RedisHashBankName:      bankName,
+				utils.RedisHashCountryName:   countryName,
 			},
 		}
 		data = append(data, redisEntry)
@@ -58,11 +63,6 @@ func parseJSON(file *os.File) ([]RedisData, error) {
 		return nil, err
 	}
 	return data, nil
-}
-
-type RedisData struct {
-	Key    string            `json:"key"`
-	Fields map[string]string `json:"fields"`
 }
 
 func isHeadquarterParser(swiftCode string) string {

@@ -18,19 +18,19 @@ type RedisStore struct {
 func (s *RedisStore) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64, error) {
 	out, err := s.client.Exists(ctx, swiftCode).Result()
 	if err != nil {
-		return -1, err
+		return utils.SwiftCodeExistsError, err
 	}
 	return out, nil
 }
 
 func (s *RedisStore) SaveBankData(ctx context.Context, data types.BankDataDetails) error {
 	hashData := map[string]interface{}{ // TODO - maybe reduce this?
-		"address":       data.Address,
-		"bankName":      data.BankName,
-		"countryISO2":   data.CountryISO2,
-		"countryName":   data.CountryName,
-		"isHeadquarter": data.IsHeadquarter,
-		"swiftCode":     data.SwiftCode,
+		utils.RedisHashAddress:       data.Address,
+		utils.RedisHashBankName:      data.BankName,
+		utils.RedisHashCountryISO2:   data.CountryIso2,
+		utils.RedisHashCountryName:   data.CountryName,
+		utils.RedisHashIsHeadquarter: data.IsHeadquarter,
+		utils.RedisHashSwiftCode:     data.SwiftCode,
 	}
 	if _, err := s.client.HSet(ctx, data.SwiftCode, hashData).Result(); err != nil {
 		return fmt.Errorf("failed to store data for key %s: %w", data.SwiftCode, err)
@@ -76,13 +76,13 @@ func (s *RedisStore) FindBankDetailsBySwiftCode(ctx context.Context, swiftCode s
 
 	bankDetails := &types.BankDataDetails{
 		BankDataCore: types.BankDataCore{
-			Address:       rows["address"],
-			BankName:      rows["bankName"],
-			CountryISO2:   rows["countryISO2"],
-			IsHeadquarter: rows["isHeadquarter"] == utils.RedisStoreTrue,
-			SwiftCode:     rows["swiftCode"],
+			Address:       rows[utils.RedisHashAddress],
+			BankName:      rows[utils.RedisHashBankName],
+			CountryIso2:   rows[utils.RedisHashCountryISO2],
+			IsHeadquarter: rows[utils.RedisHashIsHeadquarter] == utils.RedisStoreTrue,
+			SwiftCode:     rows[utils.RedisHashSwiftCode],
 		},
-		CountryName: rows["countryName"],
+		CountryName: rows[utils.RedisHashCountryName],
 	}
 
 	return bankDetails, nil
@@ -138,7 +138,7 @@ func (s *RedisStore) fetchBankDetails(ctx context.Context, branchKey string, res
 			bankData: types.BankDataCore{
 				Address:       branchFields.Address,
 				BankName:      branchFields.BankName,
-				CountryISO2:   branchFields.CountryISO2,
+				CountryIso2:   branchFields.CountryIso2,
 				IsHeadquarter: branchFields.IsHeadquarter,
 				SwiftCode:     branchFields.SwiftCode,
 			},

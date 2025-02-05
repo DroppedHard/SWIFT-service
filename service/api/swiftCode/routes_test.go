@@ -25,7 +25,7 @@ func TestSwiftCodeServiceHandlers(t *testing.T) {
 			BankDataCore: types.BankDataCore{
 				Address:       "",
 				BankName:      "",
-				CountryISO2:   "",
+				CountryIso2:   "",
 				IsHeadquarter: false,
 				SwiftCode:     "",
 			},

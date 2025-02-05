@@ -16,4 +16,5 @@ const (
 	RedisHashCountryISO2   = "countryISO2"
 	RedisHashBankName      = "bankName"
 	RedisHashCountryName   = "countryName"
+	ResponseMessageField   = "message"
 )

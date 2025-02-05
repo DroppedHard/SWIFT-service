@@ -83,5 +83,5 @@ func (h *Handler) deleteBankData(w http.ResponseWriter, r *http.Request) {
 		api.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to delete data: %w", err))
 		return
 	}
-	api.WriteMessage(w, http.StatusCreated, "bank data succesfully deleted")
+	api.WriteMessage(w, http.StatusOK, "bank data succesfully deleted")
 }

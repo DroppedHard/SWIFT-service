@@ -2,6 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"reflect"
+	"runtime"
+	"strings"
 
 	"github.com/jbub/banking/swift"
 	country "github.com/mikekonan/go-countries"
@@ -33,4 +36,13 @@ func GetCountryCodeFromSwiftCode(swiftCode string) (string, error) {
 
 func Xor(a bool, b bool) bool {
 	return (a || b) && !(a && b)
+}
+
+func GetFunctionName(i interface{}) string {
+	funcType := reflect.TypeOf(i)
+	if funcType.Kind() != reflect.Func {
+		return ""
+	}
+	fullName := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+	return fullName[strings.LastIndex(fullName, ".")+1:]
 }

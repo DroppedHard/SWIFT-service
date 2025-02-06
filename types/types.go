@@ -35,3 +35,7 @@ type BankDataStore interface {
 	FindBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*BankDataDetails, error)
 	Ping(ctx context.Context) error
 }
+
+type ReturnMessage struct {
+	Message string `json:"message"`
+}

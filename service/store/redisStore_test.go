@@ -84,7 +84,7 @@ func (suite *RedisStoreTestSuite) TearDownSuite() {
 }
 
 func (suite *RedisStoreTestSuite) TestDoesSwiftCodeExist() {
-	ctx := context.TODO()
+	ctx := context.Background()
 	suite.Run("Positive Cases", func() {
 		for _, entry := range TestRedisData {
 			suite.Run(entry.Key+" should exist", func() {

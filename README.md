@@ -6,7 +6,5 @@ A swift SWIFT service using GoLang and Redis. It enables a simple API that inclu
 TBD - after Docker
 
 TODO:
-- Handle all edge cases gracefully, with clear and informative error messages. - upewnić się
-- Provide thorough unit and integration tests to ensure reliability. - TODO
 - README na koniec
 - Swagger?

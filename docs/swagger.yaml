@@ -1,0 +1,242 @@
+basePath: /v1
+definitions:
+  types.BankDataCore:
+    properties:
+      address:
+        type: string
+      bankName:
+        type: string
+      countryISO2:
+        type: string
+      isHeadquarter:
+        type: boolean
+      swiftCode:
+        type: string
+    required:
+    - address
+    - bankName
+    - countryISO2
+    - swiftCode
+    type: object
+  types.BankDataDetails:
+    properties:
+      address:
+        type: string
+      bankName:
+        type: string
+      countryISO2:
+        type: string
+      countryName:
+        type: string
+      isHeadquarter:
+        type: boolean
+      swiftCode:
+        type: string
+    required:
+    - address
+    - bankName
+    - countryISO2
+    - countryName
+    - swiftCode
+    type: object
+  types.BankHeadquatersResponse:
+    properties:
+      address:
+        type: string
+      bankName:
+        type: string
+      branches:
+        items:
+          $ref: '#/definitions/types.BankDataCore'
+        type: array
+      countryISO2:
+        type: string
+      countryName:
+        type: string
+      isHeadquarter:
+        type: boolean
+      swiftCode:
+        type: string
+    required:
+    - address
+    - bankName
+    - countryISO2
+    - countryName
+    - swiftCode
+    type: object
+  types.CountrySwiftCodesResponse:
+    properties:
+      countryISO2:
+        type: string
+      countryName:
+        type: string
+      swiftCodes:
+        items:
+          $ref: '#/definitions/types.BankDataCore'
+        type: array
+    type: object
+  types.ReturnMessage:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: szymon.woojcik01@gmail.com
+    name: Author
+  description: A SWIFT code service
+  license:
+    name: MIT
+    url: https://github.com/DroppedHard/SWIFT-service/blob/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: swift-service
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: endpoint to verify whether system is healthy, or not
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+      summary: System health check
+      tags:
+      - status
+  /swift-codes/:
+    post:
+      consumes:
+      - application/json
+      description: Use it to add new bank data - verify data correctiness
+      parameters:
+      - description: Bank data
+        in: body
+        name: bankData
+        required: true
+        schema:
+          $ref: '#/definitions/types.BankDataDetails'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+      summary: Add bank data to the system
+      tags:
+      - bank
+  /swift-codes/{swiftCode}:
+    delete:
+      description: Use it to delete bank data by SWIFT code
+      parameters:
+      - description: Bank swift code
+        in: path
+        name: swiftCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+      summary: Delete bank data from the system
+      tags:
+      - bank
+    get:
+      description: Use it to fetch bank data by SWIFT code - if it is a HQ it branches
+        will be retrieved too
+      parameters:
+      - description: Bank swift code
+        in: path
+        name: swiftCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.BankHeadquatersResponse'
+        "206":
+          description: Partial Content
+          schema:
+            $ref: '#/definitions/types.BankHeadquatersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+      summary: Swift code to bank data
+      tags:
+      - bank
+  /swift-codes/country/{countryISO2}:
+    get:
+      description: Use it to fetch banks data by country ISO2 code
+      parameters:
+      - description: country ISO2 code
+        in: path
+        name: countryISO2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.CountrySwiftCodesResponse'
+        "206":
+          description: Partial Content
+          schema:
+            $ref: '#/definitions/types.CountrySwiftCodesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ReturnMessage'
+      summary: Country code to bank data
+      tags:
+      - bank
+schemes:
+- http
+swagger: "2.0"

@@ -3,6 +3,7 @@ package swiftCode
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/DroppedHard/SWIFT-service/service/api"
 	"github.com/DroppedHard/SWIFT-service/service/middleware"
@@ -26,6 +27,18 @@ func (h *SwiftCodeHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/swift-codes/{"+utils.PathParamSwiftCode+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateSwiftCode)(h.deleteBankData)).Methods("DELETE")
 }
 
+// getBankDataBySwiftCode godoc
+// @Summary 		Swift code to bank data
+// @Description 	Use it to fetch bank data by SWIFT code - if it is a HQ it branches will be retrieved too
+// @Tags		bank
+// @Produce  	json
+// @Param 		swiftCode 	path 	string 	true 	"Bank swift code"
+// @Success	 	200		{object}	types.BankHeadquatersResponse
+// @Success	 	206		{object}	types.BankHeadquatersResponse
+// @Failure	 	400		{object}	types.ReturnMessage
+// @Failure	 	404		{object}	types.ReturnMessage
+// @Failure	 	500		{object}	types.ReturnMessage
+// @Router 		/swift-codes/{swiftCode} [get]
 func (h *SwiftCodeHandler) getBankDataBySwiftCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]
@@ -41,11 +54,22 @@ func (h *SwiftCodeHandler) getBankDataBySwiftCode(w http.ResponseWriter, r *http
 	}
 }
 
+// getBankDataByCountryCode godoc
+// @Summary 		Country code to bank data
+// @Description 	Use it to fetch banks data by country ISO2 code
+// @Tags		bank
+// @Produce  	json
+// @Param 		countryISO2 	path 	string 	true 	"country ISO2 code"
+// @Success	 	200		{object}	types.CountrySwiftCodesResponse
+// @Success	 	206		{object}	types.CountrySwiftCodesResponse
+// @Failure	 	400		{object}	types.ReturnMessage
+// @Failure	 	500		{object}	types.ReturnMessage
+// @Router 		/swift-codes/country/{countryISO2} [get]
 func (h *SwiftCodeHandler) getBankDataByCountryCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	countryCode := mux.Vars(r)[utils.PathParamCountryIso2]
 
-	response := h.fetchBankDataByCountryCode(w, ctx, countryCode)
+	response := h.fetchBankDataByCountryCode(w, ctx, strings.ToUpper(countryCode))
 	if response == nil {
 		return
 	}
@@ -53,6 +77,18 @@ func (h *SwiftCodeHandler) getBankDataByCountryCode(w http.ResponseWriter, r *ht
 	api.WriteJson(w, http.StatusOK, response)
 }
 
+// postBankData godoc
+// @Summary 		Add bank data to the system
+// @Description 	Use it to add new bank data - verify data correctiness
+// @Tags		bank
+// @Accept  	json
+// @Produce  	json
+// @Param 		bankData 	body 	types.BankDataDetails 	true 	"Bank data"
+// @Success	 	201		{object}	types.ReturnMessage
+// @Failure	 	400		{object}	types.ReturnMessage
+// @Failure	 	409		{object}	types.ReturnMessage
+// @Failure	 	500		{object}	types.ReturnMessage
+// @Router 		/swift-codes/ [post]
 func (h *SwiftCodeHandler) postBankData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	payload := h.retrieveValidatedPayloadFromContext(w, ctx)
@@ -70,6 +106,17 @@ func (h *SwiftCodeHandler) postBankData(w http.ResponseWriter, r *http.Request) 
 	api.WriteMessage(w, http.StatusCreated, "bank data succesfully added")
 }
 
+// deleteBankData godoc
+// @Summary 		Delete bank data from the system
+// @Description 	Use it to delete bank data by SWIFT code
+// @Tags		bank
+// @Produce  	json
+// @Param 		swiftCode 	path 	string 	true 	"Bank swift code"
+// @Success	 	200		{object}	types.ReturnMessage
+// @Failure	 	400		{object}	types.ReturnMessage
+// @Failure	 	404		{object}	types.ReturnMessage
+// @Failure	 	500		{object}	types.ReturnMessage
+// @Router 		/swift-codes/{swiftCode} [delete]
 func (h *SwiftCodeHandler) deleteBankData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]

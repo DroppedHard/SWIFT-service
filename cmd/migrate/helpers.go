@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -31,15 +30,19 @@ func parseCSV(file *os.File) ([]RedisData, error) {
 	}
 
 	for _, record := range records[1:] {
-		if len(record) < 5 {
+		if len(record) < 3 {
 			continue
 		}
-		swiftCode := record[1]
-		address := record[3]
+		swiftCode := record[0]
+		countryIso2, err := utils.GetCountryCodeFromSwiftCode(swiftCode)
+		if err != nil {
+			fmt.Println("Error while parsing SWIFT code, skipping the record")
+			continue
+		}
+		address := record[2]
 		isHeadquarter := isHeadquarterParser(swiftCode)
-		countryIso2 := strings.ToUpper(record[0])
-		bankName := record[2]
-		countryName := strings.ToUpper(record[4])
+		bankName := record[1]
+		countryName := strings.ToUpper(utils.GetCountryNameFromCountryCode(countryIso2))
 
 		redisEntry := RedisData{
 			Key: swiftCode,
@@ -53,14 +56,6 @@ func parseCSV(file *os.File) ([]RedisData, error) {
 			},
 		}
 		data = append(data, redisEntry)
-	}
-	return data, nil
-}
-
-func parseJSON(file *os.File) ([]RedisData, error) {
-	var data []RedisData
-	if err := json.NewDecoder(file).Decode(&data); err != nil {
-		return nil, err
 	}
 	return data, nil
 }

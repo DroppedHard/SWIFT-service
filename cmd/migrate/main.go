@@ -25,12 +25,10 @@ func main() {
 
 	var data []RedisData
 	switch {
-	case strings.HasSuffix(filePath, ".json"):
-		data, err = parseJSON(file)
 	case strings.HasSuffix(filePath, ".csv"):
 		data, err = parseCSV(file)
 	default:
-		fmt.Println("Unsupported file format. Please provide a JSON or CSV file.")
+		fmt.Println("Unsupported file format. Please provide a CSV file.")
 		return
 	}
 

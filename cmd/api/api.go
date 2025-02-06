@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/DroppedHard/SWIFT-service/service/api"
 	"github.com/DroppedHard/SWIFT-service/service/api/swiftCode"
 	"github.com/DroppedHard/SWIFT-service/service/store"
 	"github.com/DroppedHard/SWIFT-service/utils"
@@ -31,8 +32,10 @@ func (s *APIServer) Run() error {
 	subrouter := router.PathPrefix(utils.ApiPrefix).Subrouter()
 
 	bankDataStore := store.NewStore(s.client)
-	userHandler := swiftCode.NewHandler(bankDataStore)
-	userHandler.RegisterRoutes(subrouter)
+	swiftCodeHandler := swiftCode.NewSwiftCodeHandler(bankDataStore)
+	swiftCodeHandler.RegisterRoutes(subrouter)
+	healthCheckHandler := api.NewHealthCheckHandler(bankDataStore)
+	healthCheckHandler.RegisterRoutes(subrouter)
 
 	log.Println("Listening on", fmt.Sprintf("%s:%s", s.host, s.port))
 

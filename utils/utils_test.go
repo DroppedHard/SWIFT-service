@@ -19,7 +19,7 @@ func TestCountryCodeRegex(t *testing.T) {
 
 func TestGetCountryNameFromCountryCode(t *testing.T) {
 	result := utils.GetCountryNameFromCountryCode("PL")
-	assert.Equal(t, "Poland", result)
+	assert.Equal(t, "POLAND", result)
 
 	result = utils.GetCountryNameFromCountryCode("XX")
 	assert.Equal(t, "", result)

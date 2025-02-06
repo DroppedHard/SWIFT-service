@@ -17,7 +17,7 @@ lint:
 	@gofmt -s -w .
 
 migrate:
-	@go run cmd/migrate/main.go
+	@go run ./cmd/migrate
 
 build-docker:
 	@docker build -t swift-service:latest .

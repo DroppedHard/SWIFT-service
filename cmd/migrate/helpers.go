@@ -37,9 +37,9 @@ func parseCSV(file *os.File) ([]RedisData, error) {
 		swiftCode := record[1]
 		address := record[3]
 		isHeadquarter := isHeadquarterParser(swiftCode)
-		countryIso2 := record[0]
+		countryIso2 := strings.ToUpper(record[0])
 		bankName := record[2]
-		countryName := record[4]
+		countryName := strings.ToUpper(record[4])
 
 		redisEntry := RedisData{
 			Key: swiftCode,

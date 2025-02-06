@@ -59,6 +59,7 @@ func ValidatePostSwiftCodePayload(ctx context.Context, payload *types.BankDataDe
 		return fmt.Errorf("countryISO2 '%s' does not match the country derived from SWIFT code '%s'", payload.CountryIso2, expectedCountryCode)
 	}
 	expectedCountryName := utils.GetCountryNameFromCountryCode(payload.CountryIso2)
+	payload.CountryName = strings.ToUpper(payload.CountryName)
 	if !strings.EqualFold(payload.CountryName, expectedCountryName) {
 		return fmt.Errorf("countryName '%s' does not match the country derived from countryISO2 '%s'", payload.CountryName, expectedCountryName)
 	}

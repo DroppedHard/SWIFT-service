@@ -11,22 +11,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Handler struct {
+type SwiftCodeHandler struct {
 	store types.BankDataStore
 }
 
-func NewHandler(store types.BankDataStore) *Handler {
-	return &Handler{store: store}
+func NewSwiftCodeHandler(store types.BankDataStore) *SwiftCodeHandler {
+	return &SwiftCodeHandler{store: store}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router) {
+func (h *SwiftCodeHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/swift-codes/{"+utils.PathParamSwiftCode+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateSwiftCode)(h.getBankDataBySwiftCode)).Methods("GET")
 	router.HandleFunc("/swift-codes/country/{"+utils.PathParamCountryIso2+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateCountryCode)(h.getBankDataByCountryCode)).Methods("GET")
 	router.HandleFunc("/swift-codes/", middleware.BodyValidationMiddleware(api.ValidatePostSwiftCodePayload)(h.postBankData)).Methods("POST")
 	router.HandleFunc("/swift-codes/{"+utils.PathParamSwiftCode+"}", middleware.CustomPathParameterValidationMiddleware(api.ValidateSwiftCode)(h.deleteBankData)).Methods("DELETE")
 }
 
-func (h *Handler) getBankDataBySwiftCode(w http.ResponseWriter, r *http.Request) {
+func (h *SwiftCodeHandler) getBankDataBySwiftCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]
 
@@ -41,7 +41,7 @@ func (h *Handler) getBankDataBySwiftCode(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (h *Handler) getBankDataByCountryCode(w http.ResponseWriter, r *http.Request) {
+func (h *SwiftCodeHandler) getBankDataByCountryCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	countryCode := mux.Vars(r)[utils.PathParamCountryIso2]
 
@@ -53,7 +53,7 @@ func (h *Handler) getBankDataByCountryCode(w http.ResponseWriter, r *http.Reques
 	api.WriteJson(w, http.StatusOK, response)
 }
 
-func (h *Handler) postBankData(w http.ResponseWriter, r *http.Request) {
+func (h *SwiftCodeHandler) postBankData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	payload := h.retrieveValidatedPayloadFromContext(w, ctx)
 	if payload == nil {
@@ -70,7 +70,7 @@ func (h *Handler) postBankData(w http.ResponseWriter, r *http.Request) {
 	api.WriteMessage(w, http.StatusCreated, "bank data succesfully added")
 }
 
-func (h *Handler) deleteBankData(w http.ResponseWriter, r *http.Request) {
+func (h *SwiftCodeHandler) deleteBankData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	swiftCode := mux.Vars(r)[utils.PathParamSwiftCode]
 

@@ -7,7 +7,7 @@ const (
 	ValidatorBoolRequired  = "boolRequired"
 	ValidatorCountryIso2   = "countryISO2"
 	BranchSuffix           = "XXX"
-	ApiPrefix              = "/api/v1"
+	ApiPrefix              = "/v1"
 	RedisStoreTrue         = "1"
 	RedisStoreFalse        = "0"
 	RedisHashSwiftCode     = "swiftCode"

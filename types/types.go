@@ -33,4 +33,5 @@ type BankDataStore interface {
 	FindBanksDataByCountryCode(ctx context.Context, countryCode string) ([]BankDataCore, error)
 	FindBranchesDataByHqSwiftCode(ctx context.Context, swiftCode string) ([]BankDataCore, error)
 	FindBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*BankDataDetails, error)
+	Ping(ctx context.Context) error
 }

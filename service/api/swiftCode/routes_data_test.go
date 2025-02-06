@@ -279,7 +279,7 @@ var PostBankDataPositiveTestCases = []PostBankTestCase{
 				IsHeadquarter: true,
 				Address:       "HQ Street 1",
 			},
-			CountryName: "Poland",
+			CountryName: utils.GetCountryNameFromCountryCode("PL"),
 		},
 		ExpectedCode:    http.StatusCreated,
 		MessageIncludes: "bank data succesfully added",

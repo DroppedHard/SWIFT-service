@@ -25,7 +25,7 @@ type RoutesTestSuite struct {
 
 func (suite *RoutesTestSuite) SetupTest() {
 	suite.store = new(mockSwiftCodeStore)
-	handler := swiftCode.NewHandler(suite.store)
+	handler := swiftCode.NewSwiftCodeHandler(suite.store)
 
 	suite.router = mux.NewRouter()
 	handler.RegisterRoutes(suite.router)
@@ -269,6 +269,10 @@ func (suite *RoutesTestSuite) TestDeleteBankData() {
 
 type mockSwiftCodeStore struct {
 	mock.Mock
+}
+
+func (m *mockSwiftCodeStore) Ping(ctx context.Context) error {
+	return nil
 }
 
 func (m *mockSwiftCodeStore) FindBankDetailsBySwiftCode(ctx context.Context, swiftCode string) (*types.BankDataDetails, error) {

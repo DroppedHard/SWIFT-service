@@ -15,6 +15,10 @@ type RedisStore struct {
 	client redis.Client
 }
 
+func (s *RedisStore) Ping(ctx context.Context) error {
+	return s.client.Ping(ctx).Err()
+}
+
 func (s *RedisStore) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (int64, error) {
 	out, err := s.client.Exists(ctx, swiftCode).Result()
 	if err != nil {
@@ -24,7 +28,7 @@ func (s *RedisStore) DoesSwiftCodeExist(ctx context.Context, swiftCode string) (
 }
 
 func (s *RedisStore) SaveBankData(ctx context.Context, data types.BankDataDetails) error {
-	hashData := map[string]interface{}{ // TODO - maybe reduce this?
+	hashData := map[string]interface{}{
 		utils.RedisHashAddress:       data.Address,
 		utils.RedisHashBankName:      data.BankName,
 		utils.RedisHashCountryISO2:   data.CountryIso2,

@@ -21,7 +21,7 @@ func CountryCodeRegex(countryCode string) string {
 func GetCountryNameFromCountryCode(countryCode string) string {
 	result, ok := country.ByAlpha2Code(country.Alpha2Code(countryCode))
 	if ok {
-		return result.NameStr()
+		return strings.ToUpper(result.NameStr())
 	}
 	return ""
 }
@@ -31,7 +31,7 @@ func GetCountryCodeFromSwiftCode(swiftCode string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to parse SWIFT code: %v", err)
 	}
-	return parsed.CountryCode(), nil
+	return strings.ToUpper(parsed.CountryCode()), nil
 }
 
 func Xor(a bool, b bool) bool {

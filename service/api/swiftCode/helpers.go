@@ -11,7 +11,7 @@ import (
 	"github.com/DroppedHard/SWIFT-service/utils"
 )
 
-func (h *Handler) fetchBankDataBySwiftCode(w http.ResponseWriter, ctx context.Context, swiftCode string) *types.BankDataDetails {
+func (h *SwiftCodeHandler) fetchBankDataBySwiftCode(w http.ResponseWriter, ctx context.Context, swiftCode string) *types.BankDataDetails {
 	bank, err := h.store.FindBankDetailsBySwiftCode(ctx, swiftCode)
 	if err != nil {
 		api.WriteError(w, http.StatusInternalServerError, fmt.Errorf("fetching bank details failed: %v", err))
@@ -24,7 +24,7 @@ func (h *Handler) fetchBankDataBySwiftCode(w http.ResponseWriter, ctx context.Co
 	return bank
 }
 
-func (h *Handler) writeBankHqData(w http.ResponseWriter, ctx context.Context, bank *types.BankDataDetails, swiftCode string) {
+func (h *SwiftCodeHandler) writeBankHqData(w http.ResponseWriter, ctx context.Context, bank *types.BankDataDetails, swiftCode string) {
 	branches, partialErr := h.store.FindBranchesDataByHqSwiftCode(ctx, swiftCode)
 	bankHq := types.BankHeadquatersResponse{
 		BankDataDetails: *bank,
@@ -37,7 +37,7 @@ func (h *Handler) writeBankHqData(w http.ResponseWriter, ctx context.Context, ba
 	api.WriteJson(w, http.StatusOK, bankHq)
 }
 
-func (h *Handler) fetchBankDataByCountryCode(w http.ResponseWriter, ctx context.Context, countryCode string) *types.CountrySwiftCodesResponse {
+func (h *SwiftCodeHandler) fetchBankDataByCountryCode(w http.ResponseWriter, ctx context.Context, countryCode string) *types.CountrySwiftCodesResponse {
 	banks, partialErr := h.store.FindBanksDataByCountryCode(ctx, countryCode)
 	response := types.CountrySwiftCodesResponse{
 		CountryIso2: countryCode,
@@ -51,7 +51,7 @@ func (h *Handler) fetchBankDataByCountryCode(w http.ResponseWriter, ctx context.
 	return &response
 }
 
-func (h *Handler) retrieveValidatedPayloadFromContext(w http.ResponseWriter, ctx context.Context) *types.BankDataDetails {
+func (h *SwiftCodeHandler) retrieveValidatedPayloadFromContext(w http.ResponseWriter, ctx context.Context) *types.BankDataDetails {
 	payload, ok := ctx.Value(reflect.TypeOf(types.BankDataDetails{})).(types.BankDataDetails)
 	if !ok {
 		api.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to retrieve validated payload"))
@@ -60,7 +60,7 @@ func (h *Handler) retrieveValidatedPayloadFromContext(w http.ResponseWriter, ctx
 	return &payload
 }
 
-func (h *Handler) checkBankDataExistenceInStorage(w http.ResponseWriter, ctx context.Context, swiftCode string, shouldExist bool) bool {
+func (h *SwiftCodeHandler) checkBankDataExistenceInStorage(w http.ResponseWriter, ctx context.Context, swiftCode string, shouldExist bool) bool {
 	exists, err := h.store.DoesSwiftCodeExist(ctx, swiftCode)
 	if err != nil {
 		api.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to check existence of key %s: %w", swiftCode, err))

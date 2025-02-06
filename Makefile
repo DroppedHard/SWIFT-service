@@ -19,6 +19,18 @@ lint:
 migrate:
 	@go run ./cmd/migrate
 
+migrate-help:
+	@go run ./cmd/migrate -h
+
+migrate-file:
+	@go run ./cmd/migrate -source $(source)
+
+install:
+	@go mod download
+
+tidy:
+	@go mod tidy
+
 build-docker:
 	@docker build -t swift-service:latest .
 
